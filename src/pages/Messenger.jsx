@@ -36,7 +36,7 @@ const Messenger = () => {
 
   const [messages, setMessages] = useState([]);
 
-  // const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState([]);
 
   const Test = () => {
     return <h1>hello</h1>;
@@ -44,7 +44,7 @@ const Messenger = () => {
 
   const [activeTab, setActiveTab] = useState(0);
   const tabs = [
-    { title: "Chats", content: <Chats id={id} isLoggedIn={isLoggedIn} /> },
+    { title: "Chats", content: <Chats chats={chats} setChats={setChats} /> },
     {
       title: "Contacts",
       content: <Users id={id} isLoggedIn={isLoggedIn} users={users} />,
@@ -78,6 +78,14 @@ const Messenger = () => {
       .catch((error) => {
         console.error(error);
       });
+  }, []);
+
+  useEffect(() => {
+    axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
+      console.log("CHATS");
+      console.log(res.data);
+      setChats(res.data);
+    });
   }, []);
 
   // useEffect(() => {

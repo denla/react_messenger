@@ -1,17 +1,22 @@
-import { React, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { React, useState, useEffect, useContext } from "react";
+import { Link, useParams } from "react-router-dom";
 import axios from "axios";
+import { AuthContext } from "../AuthContext";
+import moment from "moment";
 
-const Chats = ({ id, isLoggedIn }) => {
-  const [chats, setChats] = useState([]);
+const Chats = ({ chats, setChats }) => {
+  const { id } = useParams();
 
-  useEffect(() => {
-    axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
-      console.log("CHATS");
-      console.log(res.data);
-      setChats(res.data);
-    });
-  }, []);
+  // const [chats, setChats] = useState([]);
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+
+  // useEffect(() => {
+  //   axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
+  //     console.log("CHATS");
+  //     console.log(res.data);
+  //     setChats(res.data);
+  //   });
+  // }, [id]);
 
   return (
     <>
@@ -21,9 +26,17 @@ const Chats = ({ id, isLoggedIn }) => {
             className={`chat_item ${chat.other_uid == id && "active_chat"}`}
             key={chat.other_uid}
           >
-            {chat.other_username}
-            <div className="txt-secondary">{chat.last_message}</div>
-            {/* <div className="txt-secondary">{chat.updated_at}</div> */}
+            <div className="a-50"></div>
+            <div className="message_right">
+              <div className="message_top">
+                {chat.other_username}
+                <div className="txt-secondary">
+                  {moment(chat.timestamp).format("HH:mm")}
+                </div>
+              </div>
+              <div className="txt-secondary">{chat.last_message}</div>
+              {/* <div className="txt-secondary">{chat.updated_at}</div> */}
+            </div>
           </div>
         </Link>
       ))}

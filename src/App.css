@@ -78,9 +78,12 @@ a {
 }
 
 .chat_item {
-  padding: 16px;
+  padding: 10px;
   border-radius: 8px;
-  transition: 0.2s;
+  transition: 0.4s;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .chat_item:hover {
@@ -144,10 +147,36 @@ button:hover {
   justify-content: space-between;
   align-items: center;
   padding: 4px 8px;
-  transition: 0.2s;
+  transition: 0.4s;
   border-radius: 8px;
+  cursor: pointer;
 }
 
 .message:hover {
   background: #4c4c4c0d;
+}
+
+.message:active,
+.chat_item:active {
+  background: #4c4c4c1b;
+}
+
+.message_top {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.a-50 {
+  /* /* width: 50px; */
+  width: 60px;
+  border-radius: 50px;
+  overflow: hidden;
+  background: #b8b8b8;
+
+  aspect-ratio: 1/1;
+}
+
+.message_right {
+  width: 100%;
 }
