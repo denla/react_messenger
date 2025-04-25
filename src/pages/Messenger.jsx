@@ -2,6 +2,11 @@ import { useParams, Link } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { useContext, useState, useEffect } from "react";
 import axios from "axios";
+import moment from "moment";
+
+import Chats from "../component/Chats";
+// import Chats from "../components/Chats";
+import Users from "../component/Users";
 
 const Messenger = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
@@ -10,9 +15,17 @@ const Messenger = () => {
   console.log(id);
 
   const [text, setText] = useState("");
+
+  const [users, setUsers] = useState([]);
+
   const onSubmit = async (data) => {
     try {
       const response = await axios.post("http://localhost:3001/message", data);
+      const response2 = await axios.post("http://localhost:3001/chats", {
+        uid_2: id,
+        uid_1: isLoggedIn.id,
+        last_message_id: response.data.id,
+      });
       setMessages([...messages, data]);
       console.log(response.data);
     } catch (error) {
@@ -22,9 +35,22 @@ const Messenger = () => {
   };
 
   const [messages, setMessages] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [acitveChat, setActiveChat] = useState(null);
 
+  // const [chats, setChats] = useState([]);
+
+  const Test = () => {
+    return <h1>hello</h1>;
+  };
+
+  const [activeTab, setActiveTab] = useState(0);
+  const tabs = [
+    { title: "Chats", content: <Chats id={id} isLoggedIn={isLoggedIn} /> },
+    {
+      title: "Contacts",
+      content: <Users id={id} isLoggedIn={isLoggedIn} users={users} />,
+    },
+    { title: "Profile", content: "Содержимое таба 3" },
+  ];
   useEffect(() => {
     axios
       .get("http://localhost:3001/message", {
@@ -55,35 +81,61 @@ const Messenger = () => {
   }, []);
 
   // useEffect(() => {
-  //   axios
-  //     .get(`http://localhost:3001/users/${id}`)
-  //     .then((response) => {
-  //       console.log(response.data);
-  //       setActiveChat(response.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // }, [id]);
+  //   axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
+  //     console.log("CHATS");
+  //     console.log(res.data);
+  //     setChats(res.data);
+  //   });
+  // }, []);
+
+  const Tab = ({ title, content }) => {
+    return (
+      <div>
+        <h2>{title}</h2>
+        {content}
+      </div>
+    );
+  };
 
   return (
     <div>
       <div className="messenger">
-        <div className="chats_list">
-          <h3>Messenger</h3>
-          {users &&
-            users.map((user) => (
-              <Link to={`/messenger/${user.id}`}>
-                <div
-                  className={`chat_item ${user.id == id && "active_chat"}`}
-                  key={user.id}
-                >
-                  {console.log("user.id", user.id, "id", id)}
-                  {user.username}{" "}
-                  <div className="txt-secondary">{user.email}</div>
-                </div>
-              </Link>
+        <div className="chats_left">
+          {/* <h3>Messenger</h3> */}
+          {/* Tabs */}
+
+          <div className="chats_list">
+            <Tab
+              title={tabs[activeTab].title}
+              content={tabs[activeTab].content}
+            />
+
+            {/* {users &&
+              users.map((user) => (
+                <Link to={`/messenger/${user.id}`}>
+                  <div
+                    className={`chat_item ${user.id == id && "active_chat"}`}
+                    key={user.id}
+                  >
+                    {console.log("user.id", user.id, "id", id)}
+                    {user.username}{" "}
+                    <div className="txt-secondary">{user.email}</div>
+                  </div>
+                </Link>
+              ))} */}
+          </div>
+
+          <div className="menu_tabs">
+            {tabs.map((tab, index) => (
+              <div
+                key={index}
+                className={`menu_tab ${activeTab === index && "active_tab"}`}
+                onClick={() => setActiveTab(index)}
+              >
+                {tab.title}
+              </div>
             ))}
+          </div>
         </div>
         <div className="chat">
           {/* {console.log("WOOWW")}
@@ -97,25 +149,31 @@ const Messenger = () => {
           <div className="chat_messages">
             {messages &&
               messages.map((message) => (
-                <div
-                  className={`message-bubble ${
-                    message.id1 == id && "own-bubble"
-                  }`}
-                  key={message.id}
-                >
-                  {message.message}
-                  <div className="txt-secondary">{message.created_at}</div>
+                <div className="message">
+                  <div
+                    className={`message-bubble ${
+                      message.id1 == id && "own-bubble"
+                    }`}
+                    key={message.id}
+                  >
+                    {message.message}
+                  </div>
+                  <div className="txt-secondary">
+                    {moment(message.created_at).format("DD MMMM, HH:mm")}
+                  </div>
                 </div>
               ))}
           </div>
           <div className="chat_input">
             <form
+              className="chat_form"
               onSubmit={(e) => {
                 e.preventDefault();
                 onSubmit({ id1: id, id2: isLoggedIn.id, message: text });
               }}
             >
               <input
+                className="w-100"
                 type="text"
                 onChange={(e) => setText(e.target.value)}
                 placeholder="White text"
