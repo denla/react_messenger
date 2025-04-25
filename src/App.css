@@ -1,38 +1,61 @@
-.App {
-  text-align: center;
+.message-bubble {
+  width: fit-content;
+  padding: 12px;
+  margin-bottom: 4px;
+  border: 1px solid #ccc;
+  border-radius: 50px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.own-bubble {
+  background: blueviolet;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.txt-secondary {
+  font-size: 8px;
+  opacity: 0.5;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.messenger {
+  width: 1000px;
+  height: 600px;
+  border: 1px solid;
+  margin: 50px;
+  display: flex;
+}
+
+.chats_list {
+  width: 30%;
+  height: 100%;
+  border-right: 1px solid;
+}
+
+.chat {
+  border: 1px solid red;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.chat_header,
+.chat_input {
+  width: 100%;
+  height: 50px;
+  border: 1px solid;
+}
+
+.chat_messages {
+  width: 100%;
+  overflow-y: scroll;
+  height: 100%;
+  border: 1px solid;
+  justify-content: flex-end;
+}
+
+.chat_item {
+  border: 1px solid;
+  padding: 16px;
+}
+
+.active_chat {
+  background: #4c4c4c21;
 }
