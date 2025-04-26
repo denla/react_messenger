@@ -9,6 +9,7 @@ const Chats = ({ chats, setChats }) => {
 
   // const [chats, setChats] = useState([]);
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  const [searchText, setSearchText] = useState("");
 
   // useEffect(() => {
   //   axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
@@ -18,28 +19,43 @@ const Chats = ({ chats, setChats }) => {
   //   });
   // }, [id]);
 
+  // useEffect(()=> {
+  //   ch
+  // }, [searchText])
+
   return (
     <>
-      {chats.map((chat) => (
-        <Link to={`/messenger/${chat.other_uid}`}>
-          <div
-            className={`chat_item ${chat.other_uid == id && "active_chat"}`}
-            key={chat.other_uid}
-          >
-            <div className="a-50"></div>
-            <div className="message_right">
-              <div className="message_top">
-                {chat.other_username}
-                <div className="txt-secondary">
-                  {moment(chat.timestamp).format("HH:mm")}
+      <input
+        className="search"
+        type="text"
+        placeholder="Search"
+        onChange={(e) => setSearchText(e.target.value)}
+      />
+
+      {chats
+        .filter((chat) =>
+          chat.other_username.toLowerCase().includes(searchText)
+        )
+        .map((chat) => (
+          <Link to={`/messenger/${chat.other_uid}`}>
+            <div
+              className={`chat_item ${chat.other_uid == id && "active_chat"}`}
+              key={chat.other_uid}
+            >
+              <div className="a-50"></div>
+              <div className="message_right">
+                <div className="message_top">
+                  {chat.other_username}
+                  <div className="txt-secondary">
+                    {moment(chat.timestamp).format("HH:mm")}
+                  </div>
                 </div>
+                <div className="txt-secondary">{chat.last_message}</div>
+                {/* <div className="txt-secondary">{chat.updated_at}</div> */}
               </div>
-              <div className="txt-secondary">{chat.last_message}</div>
-              {/* <div className="txt-secondary">{chat.updated_at}</div> */}
             </div>
-          </div>
-        </Link>
-      ))}
+          </Link>
+        ))}
     </>
   );
 };

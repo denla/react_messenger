@@ -180,3 +180,12 @@ button:hover {
 .message_right {
   width: 100%;
 }
+
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  background: #e8e8e8;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+}

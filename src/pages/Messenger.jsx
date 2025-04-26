@@ -84,7 +84,11 @@ const Messenger = () => {
     axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
       console.log("CHATS");
       console.log(res.data);
-      setChats(res.data);
+      setChats(
+        res.data.sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        })
+      );
     });
   }, []);
 
