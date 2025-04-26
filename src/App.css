@@ -170,7 +170,16 @@ button:hover {
 .a-50 {
   /* /* width: 50px; */
   width: 60px;
-  border-radius: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #b8b8b8;
+
+  aspect-ratio: 1/1;
+}
+
+.a-120 {
+  width: 120px;
+  border-radius: 50%;
   overflow: hidden;
   background: #b8b8b8;
 
@@ -188,4 +197,10 @@ button:hover {
   border-radius: 8px;
   padding: 8px 16px;
   margin-bottom: 8px;
+}
+
+.settings_profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

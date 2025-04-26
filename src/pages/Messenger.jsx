@@ -5,8 +5,8 @@ import axios from "axios";
 import moment from "moment";
 
 import Chats from "../component/Chats";
-// import Chats from "../components/Chats";
 import Users from "../component/Users";
+import Settings from "../component/Settings";
 
 const Messenger = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
@@ -57,7 +57,12 @@ const Messenger = () => {
       title: "Contacts",
       content: <Users id={id} isLoggedIn={isLoggedIn} users={users} />,
     },
-    { title: "Profile", content: "Содержимое таба 3" },
+    {
+      title: "Profile",
+      content: (
+        <Settings isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+      ),
+    },
   ];
 
   useEffect(() => {
