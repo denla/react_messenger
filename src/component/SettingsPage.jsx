@@ -5,7 +5,9 @@ const SettingsPage = () => {
       <div className="chat_messages flex_w-center">
         <div className="cards_container">
           <h2>Settings</h2>
-          <AvatarUploader />
+          <div className="card">
+            <AvatarUploader />
+          </div>
           <div className="card">
             Name
             <input type="text" />

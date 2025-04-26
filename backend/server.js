@@ -71,7 +71,13 @@ app.get("/message", async (req, res) => {
 });
 
 app.get("/users", async (req, res) => {
-  const response = await db.query("SELECT * FROM users");
+  // const response = await db.query(
+  //   "SELECT users.id as id, users.username as username, users.email as email, avatars.avatar_path as avatar_path  FROM users LEFT JOIN avatars ON users.id = avatars.user_id"
+  // );
+
+  const response = await db.query(
+    "SELECT users.id, users.username, users.email, MAX(avatars.avatar_path) AS avatar_path FROM users LEFT JOIN avatars ON users.id = avatars.user_id GROUP BY users.id, users.username, users.email;"
+  );
   res.json(response.rows);
 });
 

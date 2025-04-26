@@ -27,9 +27,19 @@ const Chat = ({ users, id, messages, setMessages }) => {
     <div className="chat">
       <div className="chat_header">
         <div className="chat_header--info">
-          {users.find((user) => user.id == id)?.username}
-          <div className="txt-secondary">
-            {users.find((user) => user.id == id)?.email}
+          <div
+            className="a-36"
+            style={{
+              backgroundImage: `url(http://localhost:3001/${
+                users.find((user) => user.id == id)?.avatar_path
+              })`,
+            }}
+          ></div>
+          <div className="chat_header--text">
+            {users.find((user) => user.id == id)?.username}
+            <div className="txt-secondary">
+              {users.find((user) => user.id == id)?.email}
+            </div>
           </div>
         </div>
         <Link to="/messenger">
