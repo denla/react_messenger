@@ -26,8 +26,8 @@ a {
 }
 
 .messenger {
-  width: 1000px;
-  height: 600px;
+  width: calc(100vw - 500px);
+  height: calc(100vh - 100px);
   border: 1px solid #e8e8e8;
   margin: 50px;
   display: flex;
@@ -36,7 +36,7 @@ a {
 }
 
 .chats_left {
-  width: 30%;
+  width: 40%;
   height: 100%;
   border-right: 1px solid #e8e8e8;
   padding: 10px;
@@ -45,31 +45,41 @@ a {
   flex-direction: column;
 }
 
+.chat_right {
+  width: 100%;
+}
+
 .chats_list {
   height: 100%;
   overflow-y: auto;
-  width: 280px;
+  width: 100%;
 }
 
 .chat {
-  width: 100%;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  width: 100%;
 }
 .chat_header,
 .chat_input {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   padding: 12px;
   width: 100%;
   box-sizing: border-box;
+}
+
+.chat_header--info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .chat_messages {
   width: 100%;
   overflow-y: scroll;
   height: 100%;
-  justify-content: flex-end;
   background: #e8e8e8;
   padding: 20px 12px;
   box-sizing: border-box;
@@ -77,6 +87,9 @@ a {
   flex-direction: column;
 }
 
+.flex-end {
+  justify-content: flex-end;
+}
 .chat_item {
   padding: 10px;
   border-radius: 8px;
@@ -132,6 +145,11 @@ button {
   font-size: 15px;
 }
 
+button.btn-secondary {
+  background: #e8e8e8;
+  color: #2787d2;
+}
+
 button:hover {
   background: #2a90de;
 }
@@ -139,6 +157,7 @@ button:hover {
 .chat_form {
   display: flex;
   gap: 8px;
+  width: 100%;
 }
 
 .message {
@@ -203,4 +222,46 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+}
+
+.chats_right {
+  width: 100%;
+}
+
+.flex_center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex_w-center {
+  display: flex;
+  align-items: center;
+}
+
+.flex_h-center {
+  display: flex;
+  justify-content: center;
+}
+
+.cards_container {
+  width: 100%;
+  max-width: 550px;
+  padding: 20px;
+  box-sizing: border-box;
+  gap: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.card {
+  padding: 16px;
+  box-sizing: border-box;
+  background: white;
+  border-radius: 16px;
+  width: 100%;
 }

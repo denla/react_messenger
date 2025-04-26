@@ -5,8 +5,11 @@ import axios from "axios";
 import moment from "moment";
 
 import Chats from "../component/Chats";
+import Chat from "../component/Chat";
+import EmptyChat from "../component/EmptyChat";
 import Users from "../component/Users";
 import Settings from "../component/Settings";
+import SettingsPage from "../component/SettingsPage";
 
 const Messenger = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
@@ -20,27 +23,25 @@ const Messenger = () => {
   const { id } = useParams();
   console.log(id);
 
-  const [text, setText] = useState("");
-
   const [users, setUsers] = useState([]);
 
   const navigate = useNavigate();
 
-  const onSubmit = async (data) => {
-    try {
-      const response = await axios.post("http://localhost:3001/message", data);
-      const response2 = await axios.post("http://localhost:3001/chats", {
-        uid_2: id,
-        uid_1: isLoggedIn.id,
-        last_message_id: response.data.id,
-      });
-      setMessages([...messages, data]);
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
-      //   setError(error.message);
-    }
-  };
+  // const onSubmit = async (data) => {
+  //   try {
+  //     const response = await axios.post("http://localhost:3001/message", data);
+  //     const response2 = await axios.post("http://localhost:3001/chats", {
+  //       uid_2: id,
+  //       uid_1: isLoggedIn.id,
+  //       last_message_id: response.data.id,
+  //     });
+  //     setMessages([...messages, data]);
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.error(error);
+  //     //   setError(error.message);
+  //   }
+  // };
 
   const [messages, setMessages] = useState([]);
 
@@ -131,28 +132,11 @@ const Messenger = () => {
     <div>
       <div className="messenger">
         <div className="chats_left">
-          {/* <h3>Messenger</h3> */}
-          {/* Tabs */}
-
           <div className="chats_list">
             <Tab
               title={tabs[activeTab].title}
               content={tabs[activeTab].content}
             />
-
-            {/* {users &&
-              users.map((user) => (
-                <Link to={`/messenger/${user.id}`}>
-                  <div
-                    className={`chat_item ${user.id == id && "active_chat"}`}
-                    key={user.id}
-                  >
-                    {console.log("user.id", user.id, "id", id)}
-                    {user.username}{" "}
-                    <div className="txt-secondary">{user.email}</div>
-                  </div>
-                </Link>
-              ))} */}
           </div>
 
           <div className="menu_tabs">
@@ -167,16 +151,28 @@ const Messenger = () => {
             ))}
           </div>
         </div>
-        <div className="chat">
-          {/* {console.log("WOOWW")}
-          {console.log(users.find((user) => user.id == id).username)} */}
-          <div className="chat_header">
+        <div className="chats_right">
+          {activeTab === 2 && <SettingsPage />}
+          {activeTab != 2 &&
+            (id ? (
+              <Chat
+                users={users}
+                id={id}
+                messages={messages}
+                setMessages={setMessages}
+              />
+            ) : (
+              <EmptyChat />
+            ))}
+
+          {/* <div className="chat_header">
             {users.find((user) => user.id == id)?.username}
             <div className="txt-secondary">
               {users.find((user) => user.id == id)?.email}
             </div>
           </div>
           <div className="chat_messages">
+            {!id && <p>Select any chat from the list</p>}
             {messages &&
               messages.map((message) => (
                 <div className="message">
@@ -210,7 +206,7 @@ const Messenger = () => {
               />
               <button type="submit">Send</button>
             </form>
-          </div>
+          </div> */}
         </div>
       </div>
 

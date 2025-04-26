@@ -8,6 +8,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/messenger" element={<Messenger />} />
         <Route path="/messenger/:id" element={<Messenger />} />
         <Route path="/login" element={<Login />} />
       </Routes>

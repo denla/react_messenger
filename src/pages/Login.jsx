@@ -36,7 +36,7 @@ function Login() {
       const response = await axios.post("http://localhost:3001/login", data);
       console.log(response.data);
       setIsLoggedIn(response.data);
-      navigate("/messenger/1234");
+      navigate("/messenger");
     } catch (error) {
       setError(error.message);
     }
