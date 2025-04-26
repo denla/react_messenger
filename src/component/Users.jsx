@@ -36,7 +36,7 @@ const Users = ({ id, isLoggedIn }) => {
                 key={user.id}
               >
                 <div
-                  className="a-50"
+                  className={`a-50 ${user.online && "a-online"}`}
                   style={{
                     backgroundImage: `url(http://localhost:3001/${user.avatar_path})`,
                   }}
@@ -44,7 +44,11 @@ const Users = ({ id, isLoggedIn }) => {
                 <div className="message_right">
                   {console.log("user.id", user.id, "id", id)}
                   {user.username}{" "}
-                  <div className="txt-secondary">last seen recently</div>
+                  {user.online ? (
+                    <div className="online">online</div>
+                  ) : (
+                    <div className="txt-secondary">last seen recently</div>
+                  )}
                 </div>
               </div>
             </Link>

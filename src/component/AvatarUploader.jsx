@@ -20,6 +20,10 @@ const AvatarUploader = () => {
         .post("http://localhost:3001/upload-avatar", formData)
         .then((response) => {
           setUploaded(true);
+          setIsLoggedIn({
+            ...isLoggedIn,
+            avatar_path: response.data.avatar_path,
+          });
         })
         .catch((error) => {
           console.error(error);

@@ -42,7 +42,12 @@ const Chats = ({ chats, setChats }) => {
               className={`chat_item ${chat.other_uid == id && "active_chat"}`}
               key={chat.other_uid}
             >
-              <div className="a-50"></div>
+              <div
+                className="a-50"
+                style={{
+                  backgroundImage: `url(http://localhost:3001/${chat.avatar_path})`,
+                }}
+              ></div>
               <div className="message_right">
                 <div className="message_top">
                   {chat.other_username}

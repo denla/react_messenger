@@ -128,6 +128,24 @@ const Messenger = () => {
     );
   };
 
+  // WebSocket
+  const socket = new WebSocket("ws://localhost:8080");
+
+  socket.onopen = () => {
+    console.log("Соединение установлено");
+    socket.send(JSON.stringify({ type: "login", userId: isLoggedIn?.id }));
+  };
+
+  window.addEventListener("beforeunload", () => {
+    socket.send(JSON.stringify({ type: "logout", userId: isLoggedIn?.id }));
+  });
+
+  // // Когда пользователь логинится, отправляем сообщение о подключении на сервер
+  // socket.send("login");
+
+  // // // Когда пользователь выходит из системы, отправляем сообщение о отключении на сервер
+  // socket.send("logout");
+
   return (
     <div>
       <div className="messenger">

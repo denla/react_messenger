@@ -36,6 +36,35 @@ app.post("/register", async (req, res) => {
   res.json(user.rows[0]);
 });
 
+// WebSocket
+const WebSocket = require("ws");
+const wss = new WebSocket.Server({ port: 8080 });
+
+wss.on("connection", (ws) => {
+  console.log("Пользователь подключился");
+
+  ws.on("message", (data) => {
+    const message = JSON.parse(data);
+    if (message.type == "login") {
+      ws.userId = message.userId;
+      console.log("DATA");
+      console.log(ws.userId);
+      console.log(message.userId);
+      db.query("UPDATE users SET online = true WHERE id = $1", [ws.userId]);
+    } else if (message.type == "logout") {
+      db.query("UPDATE users SET online = false WHERE id = $1", [ws.userId]);
+    }
+  });
+
+  ws.on("close", () => {
+    console.log("Пользователь отключился");
+    const userId = ws.userId;
+    db.query("UPDATE users SET online = false WHERE id = $1", [userId]);
+  });
+});
+
+// =======
+
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await db.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -76,7 +105,7 @@ app.get("/users", async (req, res) => {
   // );
 
   const response = await db.query(
-    "SELECT users.id, users.username, users.email, MAX(avatars.avatar_path) AS avatar_path FROM users LEFT JOIN avatars ON users.id = avatars.user_id GROUP BY users.id, users.username, users.email;"
+    "SELECT users.online, users.id, users.username, users.email, MAX(avatars.avatar_path) AS avatar_path FROM users LEFT JOIN avatars ON users.id = avatars.user_id GROUP BY users.id, users.username, users.email;"
   );
   res.json(response.rows);
 });
@@ -99,11 +128,20 @@ app.get("/users/:id", async (req, res) => {
 app.get("/chats/:uid", async (req, res) => {
   const uid = req.params.uid;
   const response = await db.query(
-    "SELECT messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, messages.created_at AS timestamp FROM chats JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id WHERE uid_1 = $1 OR uid_2 = $1",
+    "SELECT messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END) AS avatar_path, messages.created_at AS timestamp FROM chats JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id LEFT JOIN avatars AS avatars1 ON user1.id = avatars1.user_id LEFT JOIN avatars AS avatars2 ON user2.id = avatars2.user_id WHERE uid_1 = $1 OR uid_2 = $1 GROUP BY messages.message, other_uid, other_username, messages.created_at, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END)",
     [uid]
   );
   res.json(response.rows);
 });
+
+// app.get("/chats/:uid", async (req, res) => {
+//   const uid = req.params.uid;
+//   const response = await db.query(
+//     "SELECT messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, messages.created_at AS timestamp FROM chats JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id WHERE uid_1 = $1 OR uid_2 = $1",
+//     [uid]
+//   );
+//   res.json(response.rows);
+// });
 
 app.post("/chats", async (req, res) => {
   const { uid_1, uid_2, last_message_id } = req.body;
