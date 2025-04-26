@@ -16,6 +16,8 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+app.use("/uploads", express.static("uploads"));
+
 const db = new pg.Pool({
   user: "postgres",
   host: "localhost",
@@ -125,4 +127,39 @@ app.use((err, req, res, next) => {
 
 app.listen(3001, () => {
   console.log("Server started on port 3001");
+});
+
+// avatars
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+
+app.post("/upload-avatar", upload.single("avatar"), (req, res) => {
+  const userId = req.body.userId;
+  const avatarPath = `uploads/${req.file.filename}`;
+
+  console.log(req.file.filename);
+
+  // Сохраните путь к аватару в базе данных
+  const query = {
+    text: "INSERT INTO avatars (user_id, avatar_path) VALUES ($1, $2)",
+    values: [userId, avatarPath],
+  };
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send({ message: "Ошибка загрузки аватара" });
+    } else {
+      res.send({ message: "Аватар загружен успешно" });
+    }
+  });
+});
+
+app.get("/avatar/:uid", async (req, res) => {
+  const uid = req.params.uid;
+  const response = await db.query("SELECT * FROM avatars WHERE user_id = $1", [
+    uid,
+  ]);
+  console.log("TEST");
+  console.log(response.rows);
+  res.json(response.rows);
 });

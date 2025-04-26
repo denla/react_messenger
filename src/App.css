@@ -194,6 +194,7 @@ button:hover {
   background: #b8b8b8;
 
   aspect-ratio: 1/1;
+  background-size: contain;
 }
 
 .a-120 {
@@ -202,6 +203,7 @@ button:hover {
   overflow: hidden;
   background: #b8b8b8;
 
+  background-size: contain;
   aspect-ratio: 1/1;
 }
 
@@ -264,4 +266,7 @@ button:hover {
   background: white;
   border-radius: 16px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
