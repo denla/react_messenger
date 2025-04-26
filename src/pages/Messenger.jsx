@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
 import { useContext, useState, useEffect } from "react";
 import axios from "axios";
@@ -11,12 +11,20 @@ import Users from "../component/Users";
 const Messenger = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
+  }, [isLoggedIn]);
+
   const { id } = useParams();
   console.log(id);
 
   const [text, setText] = useState("");
 
   const [users, setUsers] = useState([]);
+
+  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     try {
@@ -51,21 +59,24 @@ const Messenger = () => {
     },
     { title: "Profile", content: "Содержимое таба 3" },
   ];
+
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/message", {
-        params: {
-          id1: id,
-          id2: isLoggedIn.id,
-        },
-      })
-      .then((response) => {
-        console.log(response.data);
-        setMessages(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    if (isLoggedIn && id) {
+      axios
+        .get("http://localhost:3001/message", {
+          params: {
+            id1: id,
+            id2: isLoggedIn.id,
+          },
+        })
+        .then((response) => {
+          console.log(response.data);
+          setMessages(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   }, [id]);
 
   useEffect(() => {
@@ -81,15 +92,17 @@ const Messenger = () => {
   }, []);
 
   useEffect(() => {
-    axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
-      console.log("CHATS");
-      console.log(res.data);
-      setChats(
-        res.data.sort((a, b) => {
-          return new Date(b.created_at) - new Date(a.created_at);
-        })
-      );
-    });
+    if (isLoggedIn) {
+      axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
+        console.log("CHATS");
+        console.log(res.data);
+        setChats(
+          res.data.sort((a, b) => {
+            return new Date(b.created_at) - new Date(a.created_at);
+          })
+        );
+      });
+    }
   }, []);
 
   // useEffect(() => {
