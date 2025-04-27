@@ -9,7 +9,10 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PATCH, PUT, DELETE, OPTIONS"
+  );
   res.header("Access-Control-Max-Age", "3600");
   next();
 });
@@ -59,7 +62,10 @@ wss.on("connection", (ws) => {
   ws.on("close", () => {
     console.log("Пользователь отключился");
     const userId = ws.userId;
-    db.query("UPDATE users SET online = false WHERE id = $1", [userId]);
+    db.query(
+      "UPDATE users SET online = false, updated_at = NOW() WHERE id = $1",
+      [userId]
+    );
   });
 });
 
@@ -81,6 +87,31 @@ app.post("/login", async (req, res) => {
   res.json(user.rows[0]);
 });
 
+app.patch("/users/:id", async (req, res) => {
+  const { id } = req.params;
+  const { email, username, password } = req.body;
+  const user = await db.query("SELECT * FROM users WHERE id = $1", [id]);
+  if (!user.rows[0]) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  let updatedUser = user.rows[0];
+  if (email) {
+    updatedUser.email = email;
+  }
+  if (username) {
+    updatedUser.username = username;
+  }
+  if (password) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    updatedUser.password = hashedPassword;
+  }
+  await db.query(
+    "UPDATE users SET email = $1, username = $2, password = $3 WHERE id = $4",
+    [updatedUser.email, updatedUser.username, updatedUser.password, id]
+  );
+  res.json(updatedUser);
+});
+
 app.post("/message", async (req, res) => {
   const { id1, id2, message } = req.body;
   const response = await db.query(
@@ -99,13 +130,54 @@ app.get("/message", async (req, res) => {
   res.json(response.rows);
 });
 
+app.delete("/message/:id", async (req, res) => {
+  const id = req.params.id;
+  const last_message_chat = await db.query(
+    "SELECT * FROM chats WHERE last_message_id = $1",
+    [id]
+  );
+  if (last_message_chat.rows.length) {
+    await db.query(
+      "UPDATE chats SET last_message_id = NULL WHERE (uid_1 = $1 AND uid_2 = $2) OR (uid_1 = $2 AND uid_2 = $1)",
+      [last_message_chat.rows[0].uid_1, last_message_chat.rows[0].uid_2]
+    );
+  }
+  const response = await db.query("DELETE FROM messages WHERE id = $1", [id]);
+  res.json(response.rows);
+});
+
+// app.delete("/message/:id", async (req, res) => {
+//   const id = req.params.id;
+//   // const last_message_chat = await db.query(
+//   //   "SELECT * FROM chats WHERE last_message_id = $1", // выбор чата который надо обновить
+//   //   [id]
+//   // );
+//   // if (last_message_chat.rows.length) {
+//   //   const last_message_id = await db.query(
+//   //     "SELECT id FROM messages WHERE (id1 = $1 AND id2 = $2) OR (id1 = $2 AND id2 = $1) ORDER BY created_at DESC LIMIT 2",
+//   //     [last_message_chat.rows[0].uid_1, last_message_chat.rows[0].uid_2] // выбор id последнего сообщения
+//   //   );
+//   //   await db.query(
+//   //     "UPDATE chats SET last_message_id = $1 WHERE (uid_1 = $2 AND uid_2 = $3) OR (uid_1 = $3 AND uid_2 = $2)",
+//   //     [
+//   //       // обновить последнее сообщение id
+//   //       last_message_id.rows[1].id,
+//   //       last_message_chat.rows[1].uid_1,
+//   //       last_message_chat.rows[1].uid_2,
+//   //     ]
+//   //   );
+//   // }
+//   const response = await db.query("DELETE FROM messages WHERE id = $1", [id]);
+//   res.json(response.rows);
+// });
+
 app.get("/users", async (req, res) => {
   // const response = await db.query(
   //   "SELECT users.id as id, users.username as username, users.email as email, avatars.avatar_path as avatar_path  FROM users LEFT JOIN avatars ON users.id = avatars.user_id"
   // );
 
   const response = await db.query(
-    "SELECT users.online, users.id, users.username, users.email, MAX(avatars.avatar_path) AS avatar_path FROM users LEFT JOIN avatars ON users.id = avatars.user_id GROUP BY users.id, users.username, users.email;"
+    "SELECT users.updated_at, users.online, users.id, users.username, users.email, MAX(avatars.avatar_path) AS avatar_path FROM users LEFT JOIN avatars ON users.id = avatars.user_id GROUP BY users.id, users.username, users.email;"
   );
   res.json(response.rows);
 });
@@ -128,7 +200,7 @@ app.get("/users/:id", async (req, res) => {
 app.get("/chats/:uid", async (req, res) => {
   const uid = req.params.uid;
   const response = await db.query(
-    "SELECT messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END) AS avatar_path, messages.created_at AS timestamp FROM chats JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id LEFT JOIN avatars AS avatars1 ON user1.id = avatars1.user_id LEFT JOIN avatars AS avatars2 ON user2.id = avatars2.user_id WHERE uid_1 = $1 OR uid_2 = $1 GROUP BY messages.message, other_uid, other_username, messages.created_at, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END)",
+    "SELECT messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END) AS avatar_path, messages.created_at AS timestamp FROM chats LEFT JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id LEFT JOIN avatars AS avatars1 ON user1.id = avatars1.user_id LEFT JOIN avatars AS avatars2 ON user2.id = avatars2.user_id WHERE uid_1 = $1 OR uid_2 = $1 GROUP BY messages.message, other_uid, other_username, messages.created_at, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END)",
     [uid]
   );
   res.json(response.rows);

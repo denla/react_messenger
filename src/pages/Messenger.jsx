@@ -12,6 +12,16 @@ import Settings from "../component/Settings";
 import SettingsPage from "../component/SettingsPage";
 
 /*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Messenger component is a functional component that manages the state and
+ * behavior of a messaging application. It handles user authentication,
+ * messaging, and real-time chat functionalities. The component includes tabs
+ * for navigating between Chats, Contacts, and Profile sections. It fetches
+ * users, messages, and chats from the server, and manages WebSocket connections
+ * for real-time updates. The component uses various hooks such as useState,
+ * useEffect, useContext, and useNavigate for state management and navigation.
+ */
+
 /*******  4057b433-c983-43d4-b8ab-d0daa4cf6d09  *******/
 const Messenger = () => {
   const socket = new WebSocket("ws://localhost:8080");
