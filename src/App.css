@@ -262,6 +262,18 @@ button:hover {
   display: flex;
   justify-content: center;
 }
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+.chat_profile {
+  height: 100%;
+  gap: 12px;
+}
 
 .cards_container {
   width: 100%;
@@ -281,6 +293,16 @@ button:hover {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  height: auto;
+}
+
+.card_title {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  color: gray;
+  margin-top: 20px;
+  margin-bottom: 8px;
 }
 
 .online {
@@ -295,4 +317,24 @@ button:hover {
 .a-online {
   border: 1px solid #ffffff;
   box-shadow: 0px 0px 0px 1.5px #2787d2;
+}
+
+.emoji_picker {
+  box-sizing: border-box;
+  display: flex;
+  width: 300px;
+  height: 400px;
+  position: absolute;
+  bottom: 180px;
+}
+.EmojiPickerReact {
+  height: 100%;
+  width: 100%;
+  border-radius: 20px;
+}
+
+.message-deleted {
+  font-style: italic;
+  color: #2787d2;
+  opacity: 1;
 }

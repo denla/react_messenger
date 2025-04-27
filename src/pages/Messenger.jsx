@@ -11,7 +11,11 @@ import Users from "../component/Users";
 import Settings from "../component/Settings";
 import SettingsPage from "../component/SettingsPage";
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/*******  4057b433-c983-43d4-b8ab-d0daa4cf6d09  *******/
 const Messenger = () => {
+  const socket = new WebSocket("ws://localhost:8080");
+
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
 
   useEffect(() => {
@@ -61,7 +65,11 @@ const Messenger = () => {
     {
       title: "Profile",
       content: (
-        <Settings isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+        <Settings
+          isLoggedIn={isLoggedIn}
+          setIsLoggedIn={setIsLoggedIn}
+          socket={socket}
+        />
       ),
     },
   ];
@@ -129,8 +137,6 @@ const Messenger = () => {
   };
 
   // WebSocket
-  const socket = new WebSocket("ws://localhost:8080");
-
   socket.onopen = () => {
     console.log("Соединение установлено");
     socket.send(JSON.stringify({ type: "login", userId: isLoggedIn?.id }));

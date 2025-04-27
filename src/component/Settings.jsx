@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SettingsPage from "./SettingsPage";
 import axios from "axios";
-const Settings = ({ isLoggedIn, setIsLoggedIn }) => {
+import moment from "moment";
+const Settings = ({ isLoggedIn, setIsLoggedIn, socket }) => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState(0);
@@ -31,6 +32,13 @@ const Settings = ({ isLoggedIn, setIsLoggedIn }) => {
           style={{ backgroundImage: `url(http://localhost:3001/${avatar})` }}
         ></div>
         <h2>{isLoggedIn?.username}</h2>
+        <div className="txt-secondary">
+          last seen{" "}
+          {moment(isLoggedIn?.updated_at)
+            .format("DD MMMM, HH:mm")
+            .toLocaleLowerCase()}
+        </div>
+
         {isLoggedIn?.email}
         <br />
         {isLoggedIn?.id}
@@ -38,6 +46,9 @@ const Settings = ({ isLoggedIn, setIsLoggedIn }) => {
           onClick={() => {
             setIsLoggedIn();
             navigate("/login");
+            socket.send(
+              JSON.stringify({ type: "logout", userId: isLoggedIn?.id })
+            );
           }}
         >
           Logout

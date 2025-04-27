@@ -52,10 +52,16 @@ const Chats = ({ chats, setChats }) => {
                 <div className="message_top">
                   {chat.other_username}
                   <div className="txt-secondary">
-                    {moment(chat.timestamp).format("HH:mm")}
+                    {chat.timestamp && moment(chat.timestamp).format("HH:mm")}
                   </div>
                 </div>
-                <div className="txt-secondary">{chat.last_message}</div>
+                <div className="txt-secondary">
+                  {chat.last_message ? (
+                    chat.last_message
+                  ) : (
+                    <span className="message-deleted">Deleted message</span>
+                  )}
+                </div>
                 {/* <div className="txt-secondary">{chat.updated_at}</div> */}
               </div>
             </div>

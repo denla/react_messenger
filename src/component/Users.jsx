@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import moment from "moment";
 
 const Users = ({ id, isLoggedIn }) => {
   const [users, setUsers] = useState([]);
@@ -47,7 +48,12 @@ const Users = ({ id, isLoggedIn }) => {
                   {user.online ? (
                     <div className="online">online</div>
                   ) : (
-                    <div className="txt-secondary">last seen recently</div>
+                    <div className="txt-secondary">
+                      last seen{" "}
+                      {moment(user.updated_at)
+                        .format("DD MMMM, HH:mm")
+                        .toLocaleLowerCase()}
+                    </div>
                   )}
                 </div>
               </div>
