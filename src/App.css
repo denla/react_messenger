@@ -338,3 +338,75 @@ button:hover {
   color: #2787d2;
   opacity: 1;
 }
+
+/*Context menu*/
+.context_menu {
+  display: block;
+  position: absolute;
+  background: white;
+  padding: 8px;
+  border-radius: 12px;
+  z-index: 1;
+  margin-top: -40px;
+  box-shadow: 0 3px 10px -3px #00000026;
+  border: 1px solid #e8e8e882;
+}
+.context_menu--item {
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 100px;
+  transition: 0.2s;
+}
+.context_menu--item:hover {
+  background: #e8e8e8;
+}
+.context_button {
+  background: #00000014 !important;
+  color: #2787d2;
+  height: 10px;
+  width: 10px;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s;
+}
+.message_info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.message:hover .context_button {
+  opacity: 1;
+  pointer-events: all;
+}
+.chat_item:hover .context_button {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.profile_photos {
+  gap: 2px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.profile_photos--item {
+  background: #e8e8e8;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  background-size: cover;
+}
+
+.p-0 {
+  padding: 0;
+}
+.card input {
+  border: 0;
+  /* border-radius: 0; */
+  outline: none;
+}

@@ -115,18 +115,23 @@ const Messenger = () => {
       });
   }, []);
 
-  useEffect(() => {
+  const fetchChats = async () => {
     if (isLoggedIn) {
-      axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
-        console.log("CHATS");
-        console.log(res.data);
-        setChats(
-          res.data.sort((a, b) => {
-            return new Date(b.created_at) - new Date(a.created_at);
-          })
-        );
-      });
+      const response = await axios.get(
+        `http://localhost:3001/chats/${isLoggedIn.id}`
+      );
+      console.log("CHATS");
+      console.log(response.data);
+      setChats(
+        response.data.sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        })
+      );
     }
+  };
+
+  useEffect(() => {
+    fetchChats();
   }, []);
 
   // useEffect(() => {
@@ -193,6 +198,7 @@ const Messenger = () => {
                 id={id}
                 messages={messages}
                 setMessages={setMessages}
+                fetchChats={fetchChats}
               />
             ) : (
               <EmptyChat />

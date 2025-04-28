@@ -4,12 +4,59 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
 import EmojiPicker from "emoji-picker-react";
+import ContextButton from "./ContextButton";
+import { set } from "react-hook-form";
 
-const Chat = ({ users, id, messages, setMessages }) => {
+const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
   const [text, setText] = useState("");
+  const [postText, setPostText] = useState("");
+
   const [profileOpened, setProfileOpened] = useState(false);
   const [emojiOpened, setEmojiOpened] = useState(false);
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  const [contacts, setContacts] = useState(false);
+  const [avatars, setAvatars] = useState([]);
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    console.log("AVATARS");
+    console.log(avatars);
+  }, [avatars]);
+
+  const onEmojiClick = (event, emoji) => {
+    setText(text + emoji);
+  };
+
+  const addToContacts = async (contact_id) => {
+    try {
+      setContacts(!contacts);
+      const response = await axios.post("http://localhost:3001/contacts", {
+        user_id: isLoggedIn.id,
+        contact_id: contact_id,
+      });
+
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+      //   setError(error.message);
+    }
+  };
+
+  useEffect(() => {
+    const data = {
+      user_id: isLoggedIn.id,
+      contact_id: id,
+    };
+    console.log("CONTACTS");
+    axios
+      .get(`http://localhost:3001/contacts/${data.user_id}/${data.contact_id}`)
+      .then((res) => {
+        setContacts(res.data);
+        console.log("CONTACTS");
+        console.log(res.data);
+      });
+  }, [id]);
+
   const onSubmit = async (data) => {
     try {
       const response = await axios.post("http://localhost:3001/message", data);
@@ -19,12 +66,30 @@ const Chat = ({ users, id, messages, setMessages }) => {
         last_message_id: response.data.id,
       });
       setMessages([...messages, data]);
+      fetchChats();
       console.log(response.data);
     } catch (error) {
       console.error(error);
       //   setError(error.message);
     }
   };
+
+  const onSendPost = async (data) => {
+    try {
+      const response = await axios.post("http://localhost:3001/posts", data);
+      // setPosts(response.data);
+    } catch (error) {
+      console.error(error);
+      //   setError(error.message);
+    }
+  };
+
+  useEffect(() => {
+    axios.get(`http://localhost:3001/posts/${id}`).then((res) => {
+      console.log(res.data);
+      setPosts(res.data);
+    });
+  }, [id]);
 
   const removeMessage = async (id) => {
     try {
@@ -38,6 +103,16 @@ const Chat = ({ users, id, messages, setMessages }) => {
       //   setError(error.message);
     }
   };
+
+  useEffect(() => {
+    console.log("AVATARS");
+    console.log(id);
+    console.log("--------");
+    axios.get(`http://localhost:3001/avatars/${id}`).then((res) => {
+      console.log(res.data);
+      setAvatars(res.data);
+    });
+  }, [id]);
 
   return (
     <div className="chat">
@@ -94,13 +169,82 @@ const Chat = ({ users, id, messages, setMessages }) => {
                 </div>
 
                 {/* {users.find((user) => user.id == id)?.email} */}
-                <button onClick={() => setProfileOpened(false)}>
-                  Send message
-                </button>
+                <div className="flex_w-center">
+                  <button onClick={() => setProfileOpened(false)}>
+                    Send message
+                  </button>
+
+                  <button onClick={() => addToContacts(id)}>
+                    {contacts ? "Remove from contacts" : "Add to contacts"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="card_title">Avatars</div>
+              <div className="card">
+                <div className="profile_photos">
+                  {avatars.map((photo) => (
+                    <div
+                      key2={photo.id}
+                      user_id={photo.user_id}
+                      className="profile_photos--item"
+                      style={{
+                        backgroundImage: `url(http://localhost:3001/${photo.avatar_path})`,
+                      }}
+                    ></div>
+                  ))}
+                  {/* <div className="profile_photos--item"> </div>
+                  <div className="profile_photos--item"> </div>
+                  <div className="profile_photos--item"> </div>
+                  <div className="profile_photos--item"> </div>
+                  <div className="profile_photos--item"> </div> */}
+                </div>
               </div>
 
               <div className="card_title">Posts</div>
-              <div className="card">No posts here</div>
+              <div className="card">
+                <form
+                  className="chat_form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    onSendPost({ user_id: isLoggedIn.id, text: postText });
+                  }}
+                >
+                  <input
+                    className="w-100"
+                    type="text"
+                    onChange={(e) => setPostText(e.target.value)}
+                    placeholder="Write text"
+                  />
+                  <button type="submit">Send</button>
+                </form>
+              </div>
+              {/* <div className="card">No posts here</div> */}
+              {posts.map((post) => (
+                <div className="card">
+                  <div
+                    className="chat_header--info"
+                    onClick={() => setProfileOpened(true)}
+                  >
+                    <div
+                      className="a-36"
+                      style={{
+                        backgroundImage: `url(http://localhost:3001/${
+                          users.find((user) => user.id == id)?.avatar_path
+                        })`,
+                      }}
+                    ></div>
+                    <div className="chat_header--text">
+                      {users.find((user) => user.id == id)?.username}
+                      <div className="txt-secondary">
+                        {moment(post.created_at).format("DD MMMM, HH:mm")}
+                      </div>
+                    </div>
+                  </div>
+
+                  {post.text}
+                </div>
+              ))}
             </div>
           </div>
         </>
@@ -108,7 +252,7 @@ const Chat = ({ users, id, messages, setMessages }) => {
         <>
           <div className="chat_messages flex-end">
             {!id && <p>Select any chat from the list</p>}
-            {messages &&
+            {messages.length ? (
               messages.map((message) => (
                 <div className="message">
                   <div
@@ -119,21 +263,34 @@ const Chat = ({ users, id, messages, setMessages }) => {
                   >
                     {message.message}
                   </div>
-                  <div>
+                  <div className="message_info">
+                    <ContextButton
+                      list={[
+                        {
+                          title: "Delete",
+                          onClick: () => removeMessage(message.id),
+                        },
+                      ]}
+                    />
                     <div className="txt-secondary">
                       {moment(message.created_at).format("DD MMMM, HH:mm")}
                     </div>
-                    <div
+                    {/* <div
                       className="online"
                       onClick={() => {
                         removeMessage(message.id);
                       }}
                     >
                       Remove
-                    </div>
+                    </div> */}
                   </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              <div className="flex_center" style={{ height: "100%" }}>
+                <span className="txt-secondary">No messages here</span>
+              </div>
+            )}
           </div>
           <div className="chat_input">
             <button onClick={() => setEmojiOpened(!emojiOpened)}>Emoji</button>
@@ -141,7 +298,7 @@ const Chat = ({ users, id, messages, setMessages }) => {
               className="emoji_picker"
               style={{ display: emojiOpened ? "block" : "none" }}
             >
-              <EmojiPicker searchDisabled={true} />
+              <EmojiPicker searchDisabled={true} onEmojiClick={onEmojiClick} />
             </div>
             <form
               className="chat_form"

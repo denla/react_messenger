@@ -3,10 +3,13 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../AuthContext";
 import moment from "moment";
+import ContextButton from "./ContextButton";
+import { useNavigate } from "react-router-dom";
 
 const Chats = ({ chats, setChats }) => {
   const { id } = useParams();
 
+  const navigate = useNavigate();
   // const [chats, setChats] = useState([]);
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   const [searchText, setSearchText] = useState("");
@@ -22,6 +25,18 @@ const Chats = ({ chats, setChats }) => {
   // useEffect(()=> {
   //   ch
   // }, [searchText])
+
+  const removeChat = async (id) => {
+    try {
+      const response = await axios.delete(`http://localhost:3001/chats/${id}`);
+      setChats(chats.filter((chat) => chat.chat_id !== id));
+      console.log(response.data);
+      navigate("/messenger");
+    } catch (error) {
+      console.error(error);
+      //   setError(error.message);
+    }
+  };
 
   return (
     <>
@@ -51,6 +66,23 @@ const Chats = ({ chats, setChats }) => {
               <div className="message_right">
                 <div className="message_top">
                   {chat.other_username}
+
+                  <button
+                    className="context_button"
+                    onClick={() => removeChat(chat.chat_id)}
+                  >
+                    ···
+                  </button>
+
+                  {/* <ContextButton
+                    list={[
+                      {
+                        title: "Delete",
+                        onClick: () => removeChat(chat.id),
+                      },
+                    ]}
+                  /> */}
+
                   <div className="txt-secondary">
                     {chat.timestamp && moment(chat.timestamp).format("HH:mm")}
                   </div>

@@ -130,6 +130,23 @@ app.get("/message", async (req, res) => {
   res.json(response.rows);
 });
 
+app.post("/posts", async (req, res) => {
+  const { user_id, text } = req.body;
+  const response = await db.query(
+    "INSERT INTO posts (user_id, text) VALUES ($1, $2) RETURNING *",
+    [user_id, text]
+  );
+  res.json(response.rows[0]);
+});
+
+app.get("/posts/:id", async (req, res) => {
+  const { id } = req.params;
+  const response = await db.query("SELECT * FROM posts WHERE (user_id = $1)", [
+    id,
+  ]);
+  res.json(response.rows);
+});
+
 app.delete("/message/:id", async (req, res) => {
   const id = req.params.id;
   const last_message_chat = await db.query(
@@ -188,6 +205,15 @@ app.get("/users/:id", async (req, res) => {
   res.json(response.rows);
 });
 
+app.get("/avatars/:id", async (req, res) => {
+  const id = req.params.id;
+  const response = await db.query(
+    "SELECT * FROM avatars WHERE user_id = $1 ORDER BY created_at DESC",
+    [id]
+  );
+  res.json(response.rows);
+});
+
 // app.get("/chats/:uid", async (req, res) => {
 //   const uid = req.params.uid;
 //   const response = await db.query(
@@ -200,12 +226,24 @@ app.get("/users/:id", async (req, res) => {
 app.get("/chats/:uid", async (req, res) => {
   const uid = req.params.uid;
   const response = await db.query(
-    "SELECT messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END) AS avatar_path, messages.created_at AS timestamp FROM chats LEFT JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id LEFT JOIN avatars AS avatars1 ON user1.id = avatars1.user_id LEFT JOIN avatars AS avatars2 ON user2.id = avatars2.user_id WHERE uid_1 = $1 OR uid_2 = $1 GROUP BY messages.message, other_uid, other_username, messages.created_at, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END)",
+    "SELECT chats.id AS chat_id, messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END) AS avatar_path, messages.created_at AS timestamp FROM chats LEFT JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id LEFT JOIN avatars AS avatars1 ON user1.id = avatars1.user_id LEFT JOIN avatars AS avatars2 ON user2.id = avatars2.user_id WHERE uid_1 = $1 OR uid_2 = $1 GROUP BY chats.id, messages.message, other_uid, other_username, messages.created_at, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END)",
     [uid]
   );
   res.json(response.rows);
 });
 
+// app.get("/chats/:uid", async (req, res) => {
+//   const response = await db.query(
+//     "SELECT u.id, u.username, u.updated_at, u.online, MAX(a.avatar_path) as avatar_path " +
+//       "FROM chats c " +
+//       "JOIN users u ON c.contact_id = u.id " +
+//       "LEFT JOIN avatars a ON u.id = a.user_id " +
+//       "WHERE c.user_id = $1 " +
+//       "GROUP BY u.id, u.username, u.updated_at, u.online",
+//     [req.params.uid]
+//   );
+//   res.json(response.rows);
+// });
 // app.get("/chats/:uid", async (req, res) => {
 //   const uid = req.params.uid;
 //   const response = await db.query(
@@ -234,6 +272,62 @@ app.post("/chats", async (req, res) => {
     );
     res.json(res2.rows[0]);
   }
+});
+
+app.delete("/chats/:id", async (req, res) => {
+  const id = req.params.id;
+  const chat = await db.query("SELECT * FROM chats WHERE id = $1", [id]);
+
+  const uid1 = chat.rows[0].uid_1;
+  const uid2 = chat.rows[0].uid_2;
+
+  await db.query("DELETE FROM chats WHERE id = $1", [id]);
+
+  const response = await db.query(
+    "DELETE FROM messages WHERE (id1 = $1 AND id2 = $2) OR (id1 = $2 AND id2 = $1)",
+    [uid1, uid2]
+  );
+
+  res.json(response.rows);
+});
+
+app.post("/contacts", async (req, res) => {
+  const res1 = await db.query(
+    "SELECT * FROM contacts WHERE user_id = $1 AND contact_id = $2",
+    [req.body.user_id, req.body.contact_id]
+  );
+  if (res1.rows.length > 0) {
+    const response = await db.query(
+      "DELETE FROM contacts WHERE user_id = $1 AND contact_id = $2",
+      [req.body.user_id, req.body.contact_id]
+    );
+  } else {
+    const response = await db.query(
+      "INSERT INTO contacts (user_id, contact_id) VALUES ($1, $2) ",
+      [req.body.user_id, req.body.contact_id]
+    );
+  }
+});
+
+app.get("/contacts/:user_id/:contact_id", async (req, res) => {
+  const response = await db.query(
+    "SELECT * FROM contacts WHERE user_id = $1 AND contact_id = $2",
+    [req.params.user_id, req.params.contact_id]
+  );
+  res.json(response.rows.length > 0);
+});
+
+app.get("/contacts/:user_id", async (req, res) => {
+  const response = await db.query(
+    "SELECT u.id, u.username, u.updated_at, u.online, MAX(a.avatar_path) as avatar_path " +
+      "FROM contacts c " +
+      "JOIN users u ON c.contact_id = u.id " +
+      "LEFT JOIN avatars a ON u.id = a.user_id " +
+      "WHERE c.user_id = $1 " +
+      "GROUP BY u.id, u.username, u.updated_at, u.online",
+    [req.params.user_id]
+  );
+  res.json(response.rows);
 });
 
 app.use((err, req, res, next) => {
@@ -278,4 +372,5 @@ app.get("/avatar/:uid", async (req, res) => {
   console.log("TEST");
   console.log(response.rows);
   res.json(response.rows);
+  console.log("---------===");
 });

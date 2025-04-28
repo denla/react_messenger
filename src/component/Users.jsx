@@ -6,6 +6,7 @@ import moment from "moment";
 const Users = ({ id, isLoggedIn }) => {
   const [users, setUsers] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
     axios
@@ -19,6 +20,29 @@ const Users = ({ id, isLoggedIn }) => {
       });
   }, []);
 
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3001/contacts/${isLoggedIn.id}`)
+      .then((response) => {
+        setContacts(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+
+  // useEffect(() => {
+  //   axios
+  //     .get(`http://localhost:3001/contacts/${isLoggedIn.id}`)
+  //     .then((response) => {
+  //       console.log(response.data);
+  //       setUsers(response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // }, []);
+
   return (
     <>
       <input
@@ -27,6 +51,43 @@ const Users = ({ id, isLoggedIn }) => {
         placeholder="Search"
         onChange={(e) => setSearchText(e.target.value)}
       />
+
+      <div className="card_title">Contacts</div>
+      {contacts &&
+        contacts
+          .filter((user) => user.username.toLowerCase().includes(searchText))
+          .map((user) => (
+            <Link to={`/messenger/${user.id}`}>
+              <div
+                className={`chat_item ${user.id == id && "active_chat"}`}
+                key={user.id}
+              >
+                <div
+                  className={`a-50 ${user.online && "a-online"}`}
+                  style={{
+                    backgroundImage: `url(http://localhost:3001/${user.avatar_path})`,
+                  }}
+                ></div>
+                <div className="message_right">
+                  {console.log("user.id", user.id, "id", id)}
+                  {user.username}{" "}
+                  {user.online ? (
+                    <div className="online">online</div>
+                  ) : (
+                    <div className="txt-secondary">
+                      last seen{" "}
+                      {moment(user.updated_at)
+                        .format("DD MMMM, HH:mm")
+                        .toLocaleLowerCase()}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))}
+
+      <div className="card_title">Users</div>
+
       {users &&
         users
           .filter((user) => user.username.toLowerCase().includes(searchText))
