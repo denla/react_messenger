@@ -77,6 +77,7 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
   const onSendPost = async (data) => {
     try {
       const response = await axios.post("http://localhost:3001/posts", data);
+      setPosts([data, ...posts]);
       // setPosts(response.data);
     } catch (error) {
       console.error(error);
@@ -116,26 +117,41 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
 
   return (
     <div className="chat">
-      <div className="chat_header">
-        <div
-          className="chat_header--info"
-          onClick={() => setProfileOpened(true)}
-        >
-          <div
-            className="a-36"
-            style={{
-              backgroundImage: `url(http://localhost:3001/${
-                users.find((user) => user.id == id)?.avatar_path
-              })`,
-            }}
-          ></div>
-          <div className="chat_header--text">
-            {users.find((user) => user.id == id)?.username}
-            <div className="txt-secondary">
-              {users.find((user) => user.id == id)?.email}
+      <div
+        className={`chat_header` + " " + (profileOpened && "profile_header")}
+      >
+        {!profileOpened ? (
+          <>
+            <div
+              className="chat_header--info"
+              onClick={() => setProfileOpened(true)}
+            >
+              <div
+                className="a-36"
+                style={{
+                  backgroundImage: `url(http://localhost:3001/${
+                    users.find((user) => user.id == id)?.avatar_path
+                  })`,
+                }}
+              ></div>
+              <div className="chat_header--text">
+                {users.find((user) => user.id == id)?.username}
+                <div className="txt-secondary">
+                  {users.find((user) => user.id == id)?.email}
+                </div>
+              </div>
             </div>
+          </>
+        ) : (
+          <div className="chat_header--info">
+            <button
+              className="btn-secondary"
+              onClick={() => setProfileOpened(false)}
+            >
+              Back
+            </button>
           </div>
-        </div>
+        )}
         <Link to="/messenger">
           <button className="btn-secondary">Close</button>
         </Link>
@@ -154,7 +170,9 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                     })`,
                   }}
                 ></div>
-                <h2>{users.find((user) => user.id == id)?.username}</h2>
+                <h2 className="profile_name">
+                  {users.find((user) => user.id == id)?.username}
+                </h2>
                 <div className="txt-secondary">
                   {users.find((user) => user.id == id)?.online ? (
                     <div className="online">online</div>
@@ -169,82 +187,99 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                 </div>
 
                 {/* {users.find((user) => user.id == id)?.email} */}
-                <div className="flex_w-center">
+                <div className="profile_buttons">
                   <button onClick={() => setProfileOpened(false)}>
                     Send message
                   </button>
 
-                  <button onClick={() => addToContacts(id)}>
-                    {contacts ? "Remove from contacts" : "Add to contacts"}
+                  <button
+                    onClick={() => addToContacts(id)}
+                    className={contacts && "btn-secondary"}
+                  >
+                    {contacts ? "Remove contact" : "Add contact"}
                   </button>
                 </div>
               </div>
 
-              <div className="card_title">Avatars</div>
-              <div className="card">
-                <div className="profile_photos">
-                  {avatars.map((photo) => (
-                    <div
-                      key2={photo.id}
-                      user_id={photo.user_id}
-                      className="profile_photos--item"
-                      style={{
-                        backgroundImage: `url(http://localhost:3001/${photo.avatar_path})`,
-                      }}
-                    ></div>
-                  ))}
-                  {/* <div className="profile_photos--item"> </div>
-                  <div className="profile_photos--item"> </div>
-                  <div className="profile_photos--item"> </div>
-                  <div className="profile_photos--item"> </div>
-                  <div className="profile_photos--item"> </div> */}
-                </div>
-              </div>
-
-              <div className="card_title">Posts</div>
-              <div className="card">
-                <form
-                  className="chat_form"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    onSendPost({ user_id: isLoggedIn.id, text: postText });
-                  }}
-                >
-                  <input
-                    className="w-100"
-                    type="text"
-                    onChange={(e) => setPostText(e.target.value)}
-                    placeholder="Write text"
-                  />
-                  <button type="submit">Send</button>
-                </form>
-              </div>
-              {/* <div className="card">No posts here</div> */}
-              {posts.map((post) => (
-                <div className="card">
-                  <div
-                    className="chat_header--info"
-                    onClick={() => setProfileOpened(true)}
-                  >
-                    <div
-                      className="a-36"
-                      style={{
-                        backgroundImage: `url(http://localhost:3001/${
-                          users.find((user) => user.id == id)?.avatar_path
-                        })`,
-                      }}
-                    ></div>
-                    <div className="chat_header--text">
-                      {users.find((user) => user.id == id)?.username}
-                      <div className="txt-secondary">
-                        {moment(post.created_at).format("DD MMMM, HH:mm")}
-                      </div>
+              {avatars.length ? (
+                <>
+                  <div className="card_title">Avatars</div>
+                  <div className="card">
+                    <div className="profile_photos">
+                      {avatars.map((photo) => (
+                        <div
+                          key2={photo.id}
+                          user_id={photo.user_id}
+                          className="profile_photos--item"
+                          style={{
+                            backgroundImage: `url(http://localhost:3001/${photo.avatar_path})`,
+                          }}
+                        ></div>
+                      ))}
                     </div>
                   </div>
+                </>
+              ) : (
+                ""
+              )}
 
-                  {post.text}
-                </div>
-              ))}
+              <div className="card_title">Posts</div>
+              {isLoggedIn.id == id && (
+                <>
+                  <div className="card" style={{ padding: "8px" }}>
+                    <form
+                      className="chat_form"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        onSendPost({ user_id: isLoggedIn.id, text: postText });
+                      }}
+                    >
+                      <input
+                        className="w-100"
+                        type="text"
+                        onChange={(e) => setPostText(e.target.value)}
+                        placeholder="Write text"
+                      />
+                      <button type="submit">Send</button>
+                    </form>
+                  </div>
+                </>
+              )}
+
+              {/* <div className="card">No posts here</div> */}
+              <div className="card posts">
+                {posts.length == 0 && (
+                  <span className="txt-secondary no_posts"> No posts here</span>
+                )}
+                {posts.map((post) => (
+                  <>
+                    <div className="post" key={post.id}>
+                      <div
+                        className="chat_header--info"
+                        onClick={() => setProfileOpened(true)}
+                      >
+                        <div
+                          className="a-36"
+                          style={{
+                            backgroundImage: `url(http://localhost:3001/${
+                              users.find((user) => user.id == id)?.avatar_path
+                            })`,
+                          }}
+                        ></div>
+                        <div className="chat_header--text">
+                          {users.find((user) => user.id == id)?.username}
+                          <div className="txt-secondary">
+                            {moment(post.created_at).format("DD MMMM, HH:mm")}
+                          </div>
+                        </div>
+                      </div>
+
+                      {post.text}
+                    </div>
+                    <div className="separator"></div>
+                  </>
+                ))}
+              </div>
             </div>
           </div>
         </>

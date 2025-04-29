@@ -7,11 +7,13 @@ import { AuthContext } from "../AuthContext";
 
 import { useNavigate, Link } from "react-router-dom";
 
+import LoginForm from "../component/auth/LoginForm";
+import RegisterForm from "../component/auth/RegisterForm";
+import Tab from "../component/Tab";
+
 function Login() {
   const navigate = useNavigate();
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-
-  //   const [isLoggedIn, setIsLoggedIn] = useState();
 
   const { register: registerRegister, handleSubmit: handleSubmitRegister } =
     useForm();
@@ -19,71 +21,32 @@ function Login() {
     useForm();
   const [error, setError] = useState(null);
 
-  // const { register, handleSubmit } = useForm();
-  // const [error, setError] = useState(null);
-
-  const onSubmit = async (data) => {
-    try {
-      const response = await axios.post("http://localhost:3001/register", data);
-      console.log(response.data);
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
-  const handleLogin = async (data) => {
-    try {
-      const response = await axios.post("http://localhost:3001/login", data);
-      console.log(response.data);
-      setIsLoggedIn(response.data);
-      navigate("/messenger");
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+  const [activeTab, setActiveTab] = useState(0);
+  const tabs = [
+    { title: "Login", content: <LoginForm /> },
+    {
+      title: "Sign up",
+      content: <RegisterForm />,
+    },
+  ];
 
   return (
     <div>
-      <Link to="/messenger/1">Messenger</Link>
-      <h1>Логин</h1>
-      {isLoggedIn && (
-        <>
-          <p>Вы авторизованы</p>
-          {isLoggedIn.username}
-          <button onClick={() => setIsLoggedIn(null)}>Выход</button>
-        </>
-      )}
-
-      <h1>Регистрация</h1>
-      <form onSubmit={handleSubmitRegister(onSubmit)}>
-        <input
-          type="text"
-          {...registerRegister("username")}
-          placeholder="Username"
-        />
-        <input
-          type="email"
-          {...registerRegister("email")}
-          placeholder="Email"
-        />
-        <input
-          type="password"
-          {...registerRegister("password")}
-          placeholder="Password"
-        />
-        <button type="submit">Регистрация</button>
-      </form>
-
-      <form onSubmit={handleSubmitLogin(handleLogin)}>
-        <input type="email" {...registerLogin("email")} placeholder="Email" />
-        <input
-          type="password"
-          {...registerLogin("password")}
-          placeholder="Password"
-        />
-        <button type="submit">Авторизация</button>
-      </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      <div className="login_form card">
+        <div className="menu_tabs">
+          {tabs.map((tab, index) => (
+            <div
+              key={index}
+              className={`menu_tab ${activeTab === index && "active_tab"}`}
+              onClick={() => setActiveTab(index)}
+            >
+              {tab.title}
+            </div>
+          ))}
+        </div>
+        <Tab title={tabs[activeTab].title} content={tabs[activeTab].content} />
+      </div>
+      {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
     </div>
   );
 }

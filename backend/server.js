@@ -141,9 +141,10 @@ app.post("/posts", async (req, res) => {
 
 app.get("/posts/:id", async (req, res) => {
   const { id } = req.params;
-  const response = await db.query("SELECT * FROM posts WHERE (user_id = $1)", [
-    id,
-  ]);
+  const response = await db.query(
+    "SELECT * FROM posts WHERE (user_id = $1) ORDER BY created_at DESC",
+    [id]
+  );
   res.json(response.rows);
 });
 
@@ -226,9 +227,14 @@ app.get("/avatars/:id", async (req, res) => {
 app.get("/chats/:uid", async (req, res) => {
   const uid = req.params.uid;
   const response = await db.query(
-    "SELECT chats.id AS chat_id, messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END) AS avatar_path, messages.created_at AS timestamp FROM chats LEFT JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id LEFT JOIN avatars AS avatars1 ON user1.id = avatars1.user_id LEFT JOIN avatars AS avatars2 ON user2.id = avatars2.user_id WHERE uid_1 = $1 OR uid_2 = $1 GROUP BY chats.id, messages.message, other_uid, other_username, messages.created_at, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END)",
+    "SELECT chats.id AS chat_id, messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, (SELECT avatar_path FROM avatars WHERE user_id = CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END ORDER BY created_at DESC LIMIT 1) AS avatar_path, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, messages.created_at AS timestamp FROM chats LEFT JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id WHERE uid_1 = $1 OR uid_2 = $1 ORDER BY messages.created_at DESC",
     [uid]
   );
+
+  // const response = await db.query(
+  //   "SELECT chats.id AS chat_id, messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END) AS avatar_path, messages.created_at AS timestamp FROM chats LEFT JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id LEFT JOIN avatars AS avatars1 ON user1.id = avatars1.user_id LEFT JOIN avatars AS avatars2 ON user2.id = avatars2.user_id WHERE uid_1 = $1 OR uid_2 = $1 GROUP BY chats.id, messages.message, other_uid, other_username, messages.created_at, (CASE WHEN uid_1 = $1 THEN avatars2.avatar_path ELSE avatars1.avatar_path END)",
+  //   [uid]
+  // );
   res.json(response.rows);
 });
 

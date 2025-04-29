@@ -10,19 +10,8 @@ import EmptyChat from "../component/EmptyChat";
 import Users from "../component/Users";
 import Settings from "../component/Settings";
 import SettingsPage from "../component/SettingsPage";
+import Tab from "../component/Tab";
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Messenger component is a functional component that manages the state and
- * behavior of a messaging application. It handles user authentication,
- * messaging, and real-time chat functionalities. The component includes tabs
- * for navigating between Chats, Contacts, and Profile sections. It fetches
- * users, messages, and chats from the server, and manages WebSocket connections
- * for real-time updates. The component uses various hooks such as useState,
- * useEffect, useContext, and useNavigate for state management and navigation.
- */
-
-/*******  4057b433-c983-43d4-b8ab-d0daa4cf6d09  *******/
 const Messenger = () => {
   const socket = new WebSocket("ws://localhost:8080");
 
@@ -35,41 +24,17 @@ const Messenger = () => {
   }, [isLoggedIn]);
 
   const { id } = useParams();
-  console.log(id);
-
   const [users, setUsers] = useState([]);
-
   const navigate = useNavigate();
 
-  // const onSubmit = async (data) => {
-  //   try {
-  //     const response = await axios.post("http://localhost:3001/message", data);
-  //     const response2 = await axios.post("http://localhost:3001/chats", {
-  //       uid_2: id,
-  //       uid_1: isLoggedIn.id,
-  //       last_message_id: response.data.id,
-  //     });
-  //     setMessages([...messages, data]);
-  //     console.log(response.data);
-  //   } catch (error) {
-  //     console.error(error);
-  //     //   setError(error.message);
-  //   }
-  // };
-
   const [messages, setMessages] = useState([]);
-
   const [chats, setChats] = useState([]);
-
-  const Test = () => {
-    return <h1>hello</h1>;
-  };
 
   const [activeTab, setActiveTab] = useState(0);
   const tabs = [
     { title: "Chats", content: <Chats chats={chats} setChats={setChats} /> },
     {
-      title: "Contacts",
+      title: "People",
       content: <Users id={id} isLoggedIn={isLoggedIn} users={users} />,
     },
     {
@@ -141,15 +106,6 @@ const Messenger = () => {
   //     setChats(res.data);
   //   });
   // }, []);
-
-  const Tab = ({ title, content }) => {
-    return (
-      <div>
-        <h2>{title}</h2>
-        {content}
-      </div>
-    );
-  };
 
   // WebSocket
   socket.onopen = () => {
@@ -248,11 +204,6 @@ const Messenger = () => {
           </div> */}
         </div>
       </div>
-
-      <Link to="/login">Login</Link>
-
-      <p>{id}</p>
-      <p>{isLoggedIn && isLoggedIn.username}</p>
     </div>
   );
 };

@@ -2,11 +2,13 @@ import { React, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
+import Tab from "./Tab";
 
 const Users = ({ id, isLoggedIn }) => {
   const [users, setUsers] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [contacts, setContacts] = useState([]);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     axios
@@ -42,6 +44,10 @@ const Users = ({ id, isLoggedIn }) => {
   //       console.error(error);
   //     });
   // }, []);
+  const tabs = [
+    { title: "Contacts", content: "" },
+    { title: "All", content: "" },
+  ];
 
   return (
     <>
@@ -52,8 +58,20 @@ const Users = ({ id, isLoggedIn }) => {
         onChange={(e) => setSearchText(e.target.value)}
       />
 
-      <div className="card_title">Contacts</div>
-      {contacts &&
+      {/* <div className="card_title">People</div> */}
+      <div className="menu_tabs" style={{ padding: "10px 0" }}>
+        {tabs.map((tab, index) => (
+          <div
+            key={index}
+            className={`menu_tab ${activeTab === index && "active_tab"}`}
+            onClick={() => setActiveTab(index)}
+          >
+            {tab.title}
+          </div>
+        ))}
+      </div>
+      {activeTab == 0 &&
+        contacts &&
         contacts
           .filter((user) => user.username.toLowerCase().includes(searchText))
           .map((user) => (
@@ -86,9 +104,10 @@ const Users = ({ id, isLoggedIn }) => {
             </Link>
           ))}
 
-      <div className="card_title">Users</div>
+      {/* <div className="card_title">Users</div> */}
 
-      {users &&
+      {activeTab == 1 &&
+        users &&
         users
           .filter((user) => user.username.toLowerCase().includes(searchText))
           .map((user) => (

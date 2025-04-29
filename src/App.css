@@ -95,7 +95,7 @@ a {
 .chat_item {
   padding: 10px;
   border-radius: 8px;
-  transition: 0.4s;
+  transition: 0.2s;
   display: flex;
   gap: 12px;
   align-items: center;
@@ -110,9 +110,17 @@ a {
   background: #2687d2 !important;
   color: white;
 }
+.active_chat .online {
+  color: rgba(255, 255, 255, 0.724);
+}
+.active_chat .a-online {
+  border: 2px solid #2787d2;
+  box-shadow: 0px 0px 0px 2px #ffffff8a;
+}
 
 .menu_tabs {
   display: flex;
+  /* padding: 10px 0; */
 }
 .menu_tab {
   border: 0;
@@ -120,9 +128,11 @@ a {
   text-align: center;
   padding: 8px;
   border-radius: 8px;
+  color: #0000008a;
 }
 .active_tab {
   background: #4c4c4c21;
+  color: #000000;
 }
 
 input {
@@ -147,9 +157,14 @@ button {
   font-size: 15px;
 }
 
-button.btn-secondary {
+.btn-secondary {
   background: #e8e8e8;
   color: #2787d2;
+  transition: 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgb(220, 220, 220);
 }
 
 button:hover {
@@ -196,7 +211,8 @@ button:hover {
   background: #e8e8e8;
 
   aspect-ratio: 1/1;
-  background-size: contain;
+  background-size: cover;
+  border: 2px solid #ffffff transparent;
 }
 
 .a-36 {
@@ -206,7 +222,7 @@ button:hover {
   overflow: hidden;
   background: #e8e8e8;
   aspect-ratio: 1/1;
-  background-size: contain;
+  background-size: cover;
 }
 
 .a-120 {
@@ -215,7 +231,7 @@ button:hover {
   overflow: hidden;
   background: #e8e8e8;
 
-  background-size: contain;
+  background-size: cover;
   aspect-ratio: 1/1;
 }
 
@@ -241,6 +257,8 @@ button:hover {
 #root {
   display: flex;
   justify-content: center;
+  height: 100vh;
+  align-items: center;
 }
 
 .chats_right {
@@ -277,7 +295,7 @@ button:hover {
 
 .cards_container {
   width: 100%;
-  max-width: 550px;
+  max-width: 750px;
   padding: 20px;
   box-sizing: border-box;
   gap: 4px;
@@ -315,8 +333,8 @@ button:hover {
 }
 
 .a-online {
-  border: 1px solid #ffffff;
-  box-shadow: 0px 0px 0px 1.5px #2787d2;
+  border: 2px solid #ffffff;
+  box-shadow: 0px 0px 0px 2px #2787d2;
 }
 
 .emoji_picker {
@@ -402,6 +420,11 @@ button:hover {
   background-size: cover;
 }
 
+.profile_name {
+  margin: 5px;
+  margin-bottom: 0;
+}
+
 .p-0 {
   padding: 0;
 }
@@ -409,4 +432,62 @@ button:hover {
   border: 0;
   /* border-radius: 0; */
   outline: none;
+}
+
+.profile_buttons {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+.profile_header {
+  background: #e8e8e8;
+}
+
+.posts {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.post {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  transition: 0.2s ease;
+}
+
+.separator {
+  width: 100%;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.post:hover {
+  background: #d3d3d357;
+}
+
+.no_posts {
+  padding: 50px;
+  text-align: center;
+}
+
+/*LOGIN FORM*/
+.login_form {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 10px 0px #0000000f;
+}
+
+.login_form form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
