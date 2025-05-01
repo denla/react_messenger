@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 const imageTypeRegex = /image\/(png|jpg|jpeg)/gm;
 
 function ImageUploader({ imageFiles, setImageFiles, images, setImages }) {
+  //   const [imageFiles, setImageFiles] = useState([]);
+  //   const [images, setImages] = useState([]);
+
   const changeHandler = (e) => {
     const { files } = e.target;
     const validImageFiles = [];
@@ -12,7 +15,7 @@ function ImageUploader({ imageFiles, setImageFiles, images, setImages }) {
         validImageFiles.push(file);
       }
     }
-    if (validImageFiles.length) {
+    if (validImageFiles?.length) {
       setImageFiles(validImageFiles);
       return;
     }
@@ -23,7 +26,7 @@ function ImageUploader({ imageFiles, setImageFiles, images, setImages }) {
     const images = [],
       fileReaders = [];
     let isCancel = false;
-    if (imageFiles.length) {
+    if (imageFiles?.length) {
       imageFiles.forEach((file) => {
         const fileReader = new FileReader();
         fileReaders.push(fileReader);
@@ -48,27 +51,6 @@ function ImageUploader({ imageFiles, setImageFiles, images, setImages }) {
       });
     };
   }, [imageFiles]);
-
-  const handleUpload = () => {
-    const formData = new FormData();
-    images.forEach((image) => {
-      formData.append("image", image);
-    });
-    fetch("/upload", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.error(error));
-  };
-
-  const handleGetImage = () => {
-    fetch("/image")
-      .then((response) => response.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.error(error));
-  };
 
   return (
     <div className="App">

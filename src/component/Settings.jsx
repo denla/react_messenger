@@ -18,8 +18,8 @@ const Settings = ({ isLoggedIn, setIsLoggedIn, socket }) => {
   useEffect(() => {
     if (isLoggedIn) {
       axios.get(`http://localhost:3001/avatar/${isLoggedIn.id}`).then((res) => {
-        setAvatar(res.data[res.data.length - 1]?.avatar_path);
-        console.log(res.data[res.data.length - 1]?.avatar_path);
+        setAvatar(res.data[res.data?.length - 1]?.avatar_path);
+        console.log(res.data[res.data?.length - 1]?.avatar_path);
       });
     }
   }, []);

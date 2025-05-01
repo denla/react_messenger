@@ -10,6 +10,9 @@ import ImageUploader from "./ImageUploader";
 
 import Avatar from "./Avatar";
 
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css";
+
 const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
   const [text, setText] = useState("");
   const [postText, setPostText] = useState("");
@@ -308,16 +311,27 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                   <div className="card_title">Avatars</div>
                   <div className="card">
                     <div className="profile_photos">
-                      {avatars.map((photo) => (
-                        <div
-                          key2={photo.id}
-                          user_id={photo.user_id}
-                          className="profile_photos--item"
-                          style={{
-                            backgroundImage: `url(http://localhost:3001/${photo.avatar_path})`,
-                          }}
-                        ></div>
-                      ))}
+                      <PhotoProvider>
+                        {avatars.map((photo, i) => (
+                          <PhotoView
+                            key={i}
+                            src={`http://localhost:3001/${photo.avatar_path}`}
+                          >
+                            {/* <img
+                              src={`http://localhost:3001/${photo.avatar_path}`}
+                              alt=""
+                            /> */}
+                            <div
+                              key2={photo.id}
+                              user_id={photo.user_id}
+                              className="profile_photos--item"
+                              style={{
+                                backgroundImage: `url(http://localhost:3001/${photo.avatar_path})`,
+                              }}
+                            ></div>
+                          </PhotoView>
+                        ))}
+                      </PhotoProvider>
                     </div>
                   </div>
                 </>
@@ -400,15 +414,27 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                   >
                     <div className="message_images">
                       {/* <GridLayout autoLayout cols={3} rows={2}> */}
-                      {message.images &&
-                        message.images.map((image) => (
-                          <img
+                      <PhotoProvider>
+                        {message.images &&
+                          message.images.map((image, i) => (
+                            <PhotoView
+                              key={i}
+                              src={`http://localhost:3001/${image}`}
+                            >
+                              <img
+                                src={`http://localhost:3001/${image}`}
+                                alt=""
+                              />
+                            </PhotoView>
+                          ))}
+                      </PhotoProvider>
+                      {/* </GridLayout> */}
+
+                      {/* <img
                             className="image_preview"
                             src={`http://localhost:3001/${image}`}
                             alt=""
-                          />
-                        ))}
-                      {/* </GridLayout> */}
+                          /> */}
                     </div>
                     {message.message}
                   </div>
