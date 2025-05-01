@@ -347,11 +347,24 @@ app.listen(3001, () => {
 
 // avatars
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+// const upload = multer({
+//   dest: "uploads/",
+//   limits: { fieldSize: 10000000 }, // 10 МБ
+// });
 
-app.post("/upload-avatar", upload.single("avatar"), (req, res) => {
+const avatarUpload = multer({
+  dest: "uploads/avatars/",
+  limits: { fieldSize: 10000000 },
+});
+const imageUpload = multer({
+  dest: "uploads/images/",
+  limits: { fieldSize: 10000000 },
+});
+
+app.post("/upload-avatar", avatarUpload.single("avatar"), (req, res) => {
+  // upload.dest = "uploads/avatars/";
   const userId = req.body.userId;
-  const avatarPath = `uploads/${req.file.filename}`;
+  const avatarPath = `uploads/avatars/${req.file.filename}`;
 
   console.log(req.file.filename);
 
@@ -369,6 +382,74 @@ app.post("/upload-avatar", upload.single("avatar"), (req, res) => {
     }
   });
 });
+
+app.post("/upload-images", imageUpload.array("files"), (req, res) => {
+  // const userId = req.body.userId;
+  const files = req.files;
+  const id1 = req.body.id1;
+  const id2 = req.body.id2;
+
+  if (!files || files.length === 0) {
+    return res.status(400).send({ message: "Нет загружаемых файлов" });
+  }
+
+  // массив путей к изображениям
+  const imagePaths = files.map((file) => `uploads/images/${file.filename}`);
+
+  // const query = {
+  //   text: "INSERT INTO images (user_id, image_path) VALUES ($1, $2)",
+  //   values: [userId, imagePaths],
+  // };
+
+  const query = {
+    text: "INSERT INTO messages (id1, id2, message, images) VALUES ($1, $2, $3, $4)",
+    values: [id1, id2, "", imagePaths],
+  };
+
+  // app.post("/message", async (req, res) => {
+  //   const { id1, id2, message } = req.body;
+  //   const response = await db.query(
+  //     "INSERT INTO messages (id1, id2, message) VALUES ($1, $2, $3) RETURNING *",
+  //     [id1, id2, message]
+  //   );
+  //   res.json(response.rows[0]);
+  // });
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send({ message: "Ошибка при сохранении в БД" });
+    }
+    res.send({ message: "Изображения загружены и сохранены в одной строке" });
+  });
+});
+
+// app.post("/upload-images", upload.array("files"), (req, res) => {
+//   const userId = req.body.userId;
+//   const images = req.files;
+
+//   if (!images || images.length === 0) {
+//     return res.status(400).send({ message: "Нет загружаемых файлов" });
+//   }
+
+//   const queries = images.map((image) => {
+//     const imagePath = `uploads/${image.filename}`;
+//     return db.query({
+//       text: "INSERT INTO images (user_id, image_path) VALUES ($1, $2)",
+//       values: [userId, imagePath],
+//     });
+//   });
+
+// Дождаться выполнения всех запросов
+//   Promise.all(queries)
+//     .then(() => {
+//       res.send({ message: "Все изображения успешно загружены" });
+//     })
+//     .catch((err) => {
+//       console.error(err);
+//       res.status(500).send({ message: "Ошибка при загрузке изображений" });
+//     });
+// });
 
 app.get("/avatar/:uid", async (req, res) => {
   const uid = req.params.uid;

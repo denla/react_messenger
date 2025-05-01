@@ -6,6 +6,7 @@ import moment from "moment";
 import EmojiPicker from "emoji-picker-react";
 import ContextButton from "./ContextButton";
 import { set } from "react-hook-form";
+import ImageUploader from "./ImageUploader";
 
 const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
   const [text, setText] = useState("");
@@ -17,6 +18,8 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
   const [contacts, setContacts] = useState(false);
   const [avatars, setAvatars] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [images, setImages] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
 
   useEffect(() => {
     console.log("AVATARS");
@@ -68,6 +71,10 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
       setMessages([...messages, data]);
       fetchChats();
       console.log(response.data);
+      // handleUploadImage();
+      // setImages([]);
+      // setImageFiles([]);
+      // setText("");
     } catch (error) {
       console.error(error);
       //   setError(error.message);
@@ -91,6 +98,92 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
       setPosts(res.data);
     });
   }, [id]);
+
+  /*Images remove */
+
+  const handleDeleteImage = (index) => {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+
+    const newImageFiles = [...imageFiles];
+    newImageFiles.splice(index, 1);
+    setImageFiles(newImageFiles);
+  };
+
+  // const handleUpload = () => {
+  //   console.log("handleUpload");
+  //   if (isLoggedIn) {
+  //     const formData = new FormData();
+  //     images.forEach((files) => {
+  //       formData.append("files", files);
+  //     });
+  //     formData.append("userId", isLoggedIn.id);
+  //     console.log(formData);
+  //     axios
+  //       .post("http://localhost:3001/upload-images", formData, {
+  //         headers: { "Content-Type": "multipart/form-data" },
+  //       })
+  //       .then((response) => {
+  //         console.log("response.data");
+  //         console.log("RESPONSE AXIOS UPLOAD IMAGES");
+  //       })
+  //       .catch((error) => {
+  //         console.log("ERRORS AXIOS UPLOAD IMAGES");
+  //       });
+  //   }
+  // };
+
+  const handleUpload = () => {
+    console.log("handleUpload");
+    if (isLoggedIn && imageFiles.length > 0) {
+      const formData = new FormData();
+
+      imageFiles.forEach((file) => {
+        formData.append("files", file); // ✅ отправляем настоящие File объекты
+      });
+
+      // formData.append("userId", isLoggedIn.id); // пользователь
+
+      formData.append("id1", isLoggedIn.id); // пользователь
+      formData.append("id2", id); // получатель
+
+      axios
+        .post("http://localhost:3001/upload-images", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then((response) => {
+          console.log("RESPONSE AXIOS UPLOAD IMAGES", response.data);
+          alert("Изображения успешно загружены");
+        })
+        .catch((error) => {
+          console.error("ERRORS AXIOS UPLOAD IMAGES", error);
+          alert("Ошибка загрузки изображений");
+        });
+    } else {
+      alert("Нет выбранных изображений или пользователь не авторизован.");
+    }
+  };
+  // const handleUploadImage = () => {
+  //   const formData = new FormData();
+  //   images.forEach((image) => {
+  //     formData.append("files", image);
+  //   });
+  //   formData.append("userId", isLoggedIn.id);
+  //   console.log("PREV AXIOS UPLOAD IMAGES");
+  //   axios
+  //     .post("http://localhost:3001/upload-images", formData)
+  //     .then((response) => {
+  //       console.log("RESPONSE AXIOS UPLOAD IMAGES");
+  //       console.log(response.data);
+  //     })
+  //     .catch((error) => {
+  //       console.log("ERRORS AXIOS UPLOAD IMAGES");
+  //       console.error(error);
+  //     });
+  // };
+
+  /*-=======*/
 
   const removeMessage = async (id) => {
     try {
@@ -136,8 +229,18 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
               ></div>
               <div className="chat_header--text">
                 {users.find((user) => user.id == id)?.username}
+
                 <div className="txt-secondary">
-                  {users.find((user) => user.id == id)?.email}
+                  {users.find((user) => user.id == id)?.online ? (
+                    <div className="online">online</div>
+                  ) : (
+                    <div className="txt-secondary">
+                      last seen{" "}
+                      {moment(users.find((user) => user.id == id)?.updated_at)
+                        .format("DD MMMM, HH:mm")
+                        .toLocaleLowerCase()}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -296,6 +399,16 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                     }`}
                     key={message.id}
                   >
+                    <div className="message_images">
+                      {message.images &&
+                        message.images.map((image) => (
+                          <img
+                            className="image_preview"
+                            src={`http://localhost:3001/${image}`}
+                            alt=""
+                          />
+                        ))}
+                    </div>
                     {message.message}
                   </div>
                   <div className="message_info">
@@ -327,6 +440,29 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
               </div>
             )}
           </div>
+
+          {images.length > 0 ? (
+            <>
+              <div className="images_preview">
+                {images.map((image, idx) => {
+                  return (
+                    <div key={idx} style={{ position: "relative" }}>
+                      {" "}
+                      <img className="image_preview" src={image} alt="" />{" "}
+                      <button
+                        className="image_delete"
+                        onClick={() => handleDeleteImage(idx)}
+                      >
+                        x
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <button onClick={handleUpload}>Upload</button>
+            </>
+          ) : null}
+
           <div className="chat_input">
             <button onClick={() => setEmojiOpened(!emojiOpened)}>Emoji</button>
             <div
@@ -335,6 +471,7 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
             >
               <EmojiPicker searchDisabled={true} onEmojiClick={onEmojiClick} />
             </div>
+
             <form
               className="chat_form"
               onSubmit={(e) => {
@@ -342,6 +479,13 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                 onSubmit({ id1: id, id2: isLoggedIn.id, message: text });
               }}
             >
+              <ImageUploader
+                images={images}
+                setImages={setImages}
+                imageFiles={imageFiles}
+                setImageFiles={setImageFiles}
+              />
+
               <input
                 className="w-100"
                 type="text"

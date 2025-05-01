@@ -1,4 +1,5 @@
 import AvatarUploader from "./AvatarUploader";
+import ImageUploader from "./ImageUploader";
 import { AuthContext } from "../AuthContext";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
@@ -48,6 +49,7 @@ const SettingsPage = () => {
             {/* <div className="card_title">Avatar</div> */}
             <div className="card">
               <AvatarUploader />
+              <ImageUploader />
             </div>
 
             <div className="card_title">Username</div>
