@@ -20,8 +20,27 @@ a {
   border-radius: 20px;
 }
 .message_images {
-  display: flex;
+  /* display: flex;
+  gap: 4px; */
+  display: grid;
   gap: 4px;
+  max-width: 300px;
+}
+/* .collage-1 {
+  grid-template-columns: auto;
+}
+.collage-2 {
+  grid-template-columns: auto auto;
+}
+.collage-3 {
+  grid-template-columns: 1fr 1fr;
+} */
+
+.message_images img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0px 0px 1px 0px black;
 }
 
 .own-bubble {
@@ -102,9 +121,9 @@ a {
   flex-direction: column;
 }
 
-.flex-end {
+/* .flex-end {
   justify-content: flex-end;
-}
+} */
 .chat_item {
   padding: 10px;
   border-radius: 8px;
@@ -236,6 +255,17 @@ button:hover {
   background: #e8e8e8;
   aspect-ratio: 1/1;
   background-size: cover;
+}
+.a {
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e8e8e8;
+  background-size: cover;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #b1b1b19b;
 }
 
 .a-120 {

@@ -8,6 +8,8 @@ import ContextButton from "./ContextButton";
 import { set } from "react-hook-form";
 import ImageUploader from "./ImageUploader";
 
+import Avatar from "./Avatar";
+
 const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
   const [text, setText] = useState("");
   const [postText, setPostText] = useState("");
@@ -219,14 +221,12 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
               className="chat_header--info"
               onClick={() => setProfileOpened(true)}
             >
-              <div
-                className="a-36"
-                style={{
-                  backgroundImage: `url(http://localhost:3001/${
-                    users.find((user) => user.id == id)?.avatar_path
-                  })`,
-                }}
-              ></div>
+              <Avatar
+                size={36}
+                name={users.find((user) => user.id == id)?.username}
+                img_url={users.find((user) => user.id == id)?.avatar_path}
+                online={users.find((user) => user.id == id)?.online}
+              ></Avatar>
               <div className="chat_header--text">
                 {users.find((user) => user.id == id)?.username}
 
@@ -265,14 +265,13 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
           <div className="chat_messages flex_w-center">
             <div className="cards_container">
               <div className="flex_w-center flex-column chat_profile card">
-                <div
-                  className="a-120"
-                  style={{
-                    backgroundImage: `url(http://localhost:3001/${
-                      users.find((user) => user.id == id)?.avatar_path
-                    })`,
-                  }}
-                ></div>
+                <Avatar
+                  size={120}
+                  name={users.find((user) => user.id == id)?.username}
+                  img_url={users.find((user) => user.id == id)?.avatar_path}
+                  online={users.find((user) => user.id == id)?.online}
+                ></Avatar>
+
                 <h2 className="profile_name">
                   {users.find((user) => user.id == id)?.username}
                 </h2>
@@ -361,14 +360,14 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                         className="chat_header--info"
                         onClick={() => setProfileOpened(true)}
                       >
-                        <div
-                          className="a-36"
-                          style={{
-                            backgroundImage: `url(http://localhost:3001/${
-                              users.find((user) => user.id == id)?.avatar_path
-                            })`,
-                          }}
-                        ></div>
+                        <Avatar
+                          size={36}
+                          name={users.find((user) => user.id == id)?.username}
+                          img_url={
+                            users.find((user) => user.id == id)?.avatar_path
+                          }
+                          online={users.find((user) => user.id == id)?.online}
+                        ></Avatar>
                         <div className="chat_header--text">
                           {users.find((user) => user.id == id)?.username}
                           <div className="txt-secondary">
@@ -400,6 +399,7 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                     key={message.id}
                   >
                     <div className="message_images">
+                      {/* <GridLayout autoLayout cols={3} rows={2}> */}
                       {message.images &&
                         message.images.map((image) => (
                           <img
@@ -408,6 +408,7 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                             alt=""
                           />
                         ))}
+                      {/* </GridLayout> */}
                     </div>
                     {message.message}
                   </div>

@@ -227,7 +227,7 @@ app.get("/avatars/:id", async (req, res) => {
 app.get("/chats/:uid", async (req, res) => {
   const uid = req.params.uid;
   const response = await db.query(
-    "SELECT chats.id AS chat_id, messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, (SELECT avatar_path FROM avatars WHERE user_id = CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END ORDER BY created_at DESC LIMIT 1) AS avatar_path, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, messages.created_at AS timestamp FROM chats LEFT JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id WHERE uid_1 = $1 OR uid_2 = $1 ORDER BY messages.created_at DESC",
+    "SELECT chats.id AS chat_id, messages.message AS last_message, CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END AS other_uid, (SELECT avatar_path FROM avatars WHERE user_id = CASE WHEN uid_1 = $1 THEN uid_2 ELSE uid_1 END ORDER BY created_at DESC LIMIT 1) AS avatar_path, CASE WHEN uid_1 = $1 THEN user2.username ELSE user1.username END AS other_username, CASE WHEN uid_1 = $1 THEN user2.online ELSE user1.online END AS other_online, messages.created_at AS timestamp FROM chats LEFT JOIN messages ON chats.last_message_id = messages.id JOIN users AS user1 ON chats.uid_1 = user1.id JOIN users AS user2 ON chats.uid_2 = user2.id WHERE uid_1 = $1 OR uid_2 = $1 ORDER BY messages.created_at DESC",
     [uid]
   );
 

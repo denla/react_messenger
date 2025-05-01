@@ -5,6 +5,7 @@ import { AuthContext } from "../AuthContext";
 import moment from "moment";
 import ContextButton from "./ContextButton";
 import { useNavigate } from "react-router-dom";
+import Avatar from "./Avatar";
 
 const Chats = ({ chats, setChats }) => {
   const { id } = useParams();
@@ -57,12 +58,13 @@ const Chats = ({ chats, setChats }) => {
               className={`chat_item ${chat.other_uid == id && "active_chat"}`}
               key={chat.other_uid}
             >
-              <div
-                className="a-50"
-                style={{
-                  backgroundImage: `url(http://localhost:3001/${chat.avatar_path})`,
-                }}
-              ></div>
+              <Avatar
+                size={64}
+                name={chat.other_username}
+                img_url={chat.avatar_path}
+                online={chat.other_online}
+              ></Avatar>
+
               <div className="message_right">
                 <div className="message_top">
                   {chat.other_username}

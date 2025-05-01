@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import moment from "moment";
 import Tab from "./Tab";
+import Avatar from "./Avatar";
 
 const Users = ({ id, isLoggedIn }) => {
   const [users, setUsers] = useState([]);
@@ -80,12 +81,20 @@ const Users = ({ id, isLoggedIn }) => {
                 className={`chat_item ${user.id == id && "active_chat"}`}
                 key={user.id}
               >
-                <div
+                {/* <div
                   className={`a-50 ${user.online && "a-online"}`}
                   style={{
                     backgroundImage: `url(http://localhost:3001/${user.avatar_path})`,
                   }}
-                ></div>
+                ></div> */}
+
+                <Avatar
+                  size={64}
+                  name={user.username}
+                  img_url={user.avatar_path}
+                  online={user.online}
+                ></Avatar>
+
                 <div className="message_right">
                   {console.log("user.id", user.id, "id", id)}
                   {user.username}{" "}
@@ -116,12 +125,19 @@ const Users = ({ id, isLoggedIn }) => {
                 className={`chat_item ${user.id == id && "active_chat"}`}
                 key={user.id}
               >
-                <div
+                {/* <div
                   className={`a-50 ${user.online && "a-online"}`}
                   style={{
                     backgroundImage: `url(http://localhost:3001/${user.avatar_path})`,
                   }}
-                ></div>
+                ></div> */}
+
+                <Avatar
+                  size={64}
+                  name={user.username}
+                  img_url={user.avatar_path}
+                  online={user.online}
+                ></Avatar>
                 <div className="message_right">
                   {console.log("user.id", user.id, "id", id)}
                   {user.username}{" "}
