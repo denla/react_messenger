@@ -7,7 +7,7 @@ import ContextButton from "./ContextButton";
 import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 
-const Chats = ({ chats, setChats }) => {
+const Chats = ({ chats, setChats, openedMenu, setOpenedMenu, isMobile }) => {
   const { id } = useParams();
 
   const navigate = useNavigate();
@@ -55,8 +55,15 @@ const Chats = ({ chats, setChats }) => {
         .map((chat) => (
           <Link to={`/messenger/${chat.other_uid}`}>
             <div
-              className={`chat_item ${chat.other_uid == id && "active_chat"}`}
+              className={`chat_item ${
+                chat.other_uid == id && !isMobile && "active_chat"
+              }`}
               key={chat.other_uid}
+              onClick={() => {
+                if (isMobile) {
+                  setOpenedMenu(false);
+                }
+              }}
             >
               <Avatar
                 size={64}
@@ -68,13 +75,6 @@ const Chats = ({ chats, setChats }) => {
               <div className="message_right">
                 <div className="message_top">
                   {chat.other_username}
-
-                  <button
-                    className="context_button"
-                    onClick={() => removeChat(chat.chat_id)}
-                  >
-                    ···
-                  </button>
 
                   {/* <ContextButton
                     list={[
@@ -89,12 +89,21 @@ const Chats = ({ chats, setChats }) => {
                     {chat.timestamp && moment(chat.timestamp).format("HH:mm")}
                   </div>
                 </div>
-                <div className="txt-secondary">
-                  {chat.last_message ? (
-                    chat.last_message
-                  ) : (
-                    <span className="message-deleted">Deleted message</span>
-                  )}
+
+                <div className="message_bottom">
+                  <div className=" message_preview">
+                    {chat.last_message ? (
+                      chat.last_message
+                    ) : (
+                      <span className="message-deleted">Deleted message</span>
+                    )}
+                  </div>
+                  <button
+                    className="context_button"
+                    onClick={() => removeChat(chat.chat_id)}
+                  >
+                    ···
+                  </button>
                 </div>
                 {/* <div className="txt-secondary">{chat.updated_at}</div> */}
               </div>

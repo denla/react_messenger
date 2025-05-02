@@ -12,10 +12,25 @@ import Settings from "../component/Settings";
 import SettingsPage from "../component/SettingsPage";
 import Tab from "../component/Tab";
 
+import back_icon from "../sources/icons/back_icon.svg";
+import menu_icon from "../sources/icons/menu_icon.svg";
+import { set } from "react-hook-form";
 const Messenger = () => {
+  const [openedMenu, setOpenedMenu] = useState(true);
   const socket = new WebSocket("ws://localhost:8080");
 
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -32,10 +47,29 @@ const Messenger = () => {
 
   const [activeTab, setActiveTab] = useState(0);
   const tabs = [
-    { title: "Chats", content: <Chats chats={chats} setChats={setChats} /> },
+    {
+      title: "Chats",
+      content: (
+        <Chats
+          chats={chats}
+          setChats={setChats}
+          openedMenu={openedMenu}
+          setOpenedMenu={setOpenedMenu}
+          isMobile={isMobile}
+        />
+      ),
+    },
     {
       title: "People",
-      content: <Users id={id} isLoggedIn={isLoggedIn} users={users} />,
+      content: (
+        <Users
+          id={id}
+          isLoggedIn={isLoggedIn}
+          users={users}
+          setOpenedMenu={setOpenedMenu}
+          isMobile={isMobile}
+        />
+      ),
     },
     {
       title: "Profile",
@@ -125,27 +159,40 @@ const Messenger = () => {
   return (
     <div>
       <div className="messenger">
-        <div className="chats_left">
-          <div className="chats_list">
-            <Tab
-              title={tabs[activeTab].title}
-              content={tabs[activeTab].content}
-            />
-          </div>
-
-          <div className="menu_tabs">
-            {tabs.map((tab, index) => (
-              <div
-                key={index}
-                className={`menu_tab ${activeTab === index && "active_tab"}`}
-                onClick={() => setActiveTab(index)}
+        {openedMenu && (
+          <div className="chats_left">
+            <div className="chats_list">
+              {/* <button className="btn-icon" onClick={setOpenedMenu(!openedMenu)}>
+              <img src={back_icon} />
+            </button> */}
+              {/* <button
+                className="btn-icon"
+                onClick={() => setOpenedMenu(!openedMenu)}
               >
-                {tab.title}
-              </div>
-            ))}
+                <img src={back_icon} />
+              </button> */}
+              <Tab
+                title={tabs[activeTab].title}
+                content={tabs[activeTab].content}
+              />
+            </div>
+
+            <div className="menu_tabs">
+              {tabs.map((tab, index) => (
+                <div
+                  key={index}
+                  className={`menu_tab ${activeTab === index && "active_tab"}`}
+                  onClick={() => setActiveTab(index)}
+                >
+                  {tab.title}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="chats_right">
+        )}
+        <div
+          className={`chats_right ${openedMenu && isMobile && "display-none"}`}
+        >
           {activeTab === 2 && <SettingsPage />}
           {activeTab != 2 &&
             (id ? (
@@ -155,6 +202,9 @@ const Messenger = () => {
                 messages={messages}
                 setMessages={setMessages}
                 fetchChats={fetchChats}
+                openedMenu={openedMenu}
+                setOpenedMenu={setOpenedMenu}
+                isMobile={isMobile}
               />
             ) : (
               <EmptyChat />

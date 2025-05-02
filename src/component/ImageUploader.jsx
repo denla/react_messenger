@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import attach_icon from "../sources/icons/attach_icon.svg";
 
 const imageTypeRegex = /image\/(png|jpg|jpeg)/gm;
 
@@ -23,7 +24,7 @@ function ImageUploader({ imageFiles, setImageFiles, images, setImages }) {
   };
 
   useEffect(() => {
-    const images = [],
+    const imagesArr = [],
       fileReaders = [];
     let isCancel = false;
     if (imageFiles?.length) {
@@ -33,10 +34,10 @@ function ImageUploader({ imageFiles, setImageFiles, images, setImages }) {
         fileReader.onload = (e) => {
           const { result } = e.target;
           if (result) {
-            images.push(result);
+            imagesArr.push(result);
           }
-          if (images.length === imageFiles.length && !isCancel) {
-            setImages(images);
+          if (imagesArr.length === imageFiles.length && !isCancel) {
+            setImages(imagesArr);
           }
         };
         fileReader.readAsDataURL(file);
@@ -53,23 +54,22 @@ function ImageUploader({ imageFiles, setImageFiles, images, setImages }) {
   }, [imageFiles]);
 
   return (
-    <div className="App">
-      <form>
-        <p>
-          <label htmlFor="file" className="loader_image">
-            <div className="btn-secondary">...</div>
-          </label>
-          <input
-            type="file"
-            id="file"
-            onChange={changeHandler}
-            accept="image/png, image/jpg, image/jpeg"
-            className="loader_input"
-            multiple
-          />
-        </p>
-      </form>
-    </div>
+    <form>
+      <label htmlFor="file" className="loader_image">
+        {/* <div className="btn-secondary">...</div> */}
+        <div className="btn-icon" type="submit">
+          <img src={attach_icon} />
+        </div>
+      </label>
+      <input
+        type="file"
+        id="file"
+        onChange={changeHandler}
+        accept="image/png, image/jpg, image/jpeg"
+        className="loader_input"
+        multiple
+      />
+    </form>
   );
 }
 

@@ -13,7 +13,24 @@ import Avatar from "./Avatar";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
-const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
+/*icons*/
+
+import back_icon from "../sources/icons/back_icon.svg";
+import close_icon from "../sources/icons/close_icon.svg";
+import emoji_icon from "../sources/icons/emoji_icon.svg";
+import send_icon from "../sources/icons/send_icon.svg";
+import menu_icon from "../sources/icons/menu_icon.svg";
+
+const Chat = ({
+  users,
+  id,
+  messages,
+  setMessages,
+  fetchChats,
+  openedMenu,
+  setOpenedMenu,
+  isMobile,
+}) => {
   const [text, setText] = useState("");
   const [postText, setPostText] = useState("");
 
@@ -67,15 +84,20 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post("http://localhost:3001/message", data);
-      const response2 = await axios.post("http://localhost:3001/chats", {
-        uid_2: id,
-        uid_1: isLoggedIn.id,
-        last_message_id: response.data.id,
-      });
-      setMessages([...messages, data]);
+      if (text) {
+        const response = await axios.post(
+          "http://localhost:3001/message",
+          data
+        );
+        const response2 = await axios.post("http://localhost:3001/chats", {
+          uid_2: id,
+          uid_1: isLoggedIn.id,
+          last_message_id: response.data.id,
+        });
+        setMessages([...messages, data]);
+      }
+      handleUpload();
       fetchChats();
-      console.log(response.data);
       // handleUploadImage();
       // setImages([]);
       // setImageFiles([]);
@@ -160,6 +182,8 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
         .then((response) => {
           console.log("RESPONSE AXIOS UPLOAD IMAGES", response.data);
           alert("Изображения успешно загружены");
+          setImages([]);
+          setImageFiles([]);
         })
         .catch((error) => {
           console.error("ERRORS AXIOS UPLOAD IMAGES", error);
@@ -212,7 +236,9 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
       setAvatars(res.data);
     });
   }, [id]);
-
+  const handleEmojiClick = (emojiData) => {
+    setText((prevText) => prevText + emojiData.emoji);
+  };
   return (
     <div className="chat">
       <div
@@ -220,6 +246,12 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
       >
         {!profileOpened ? (
           <>
+            <button
+              className="btn-icon"
+              onClick={() => setOpenedMenu(!openedMenu)}
+            >
+              <img src={menu_icon} />
+            </button>
             <div
               className="chat_header--info"
               onClick={() => setProfileOpened(true)}
@@ -259,7 +291,12 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
           </div>
         )}
         <Link to="/messenger">
-          <button className="btn-secondary">Close</button>
+          {/* <button className="btn-secondary">Close</button> */}
+          {!isMobile && (
+            <button className="btn-icon" type="submit">
+              <img src={close_icon} />
+            </button>
+          )}
         </Link>
       </div>
 
@@ -477,28 +514,26 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                       {" "}
                       <img className="image_preview" src={image} alt="" />{" "}
                       <button
-                        className="image_delete"
+                        className="btn-icon btn-remove-img"
                         onClick={() => handleDeleteImage(idx)}
                       >
-                        x
+                        <img src={close_icon} />
                       </button>
                     </div>
                   );
                 })}
               </div>
-              <button onClick={handleUpload}>Upload</button>
+              {/* <button onClick={handleUpload}>Upload</button> */}
             </>
           ) : null}
 
           <div className="chat_input">
-            <button onClick={() => setEmojiOpened(!emojiOpened)}>Emoji</button>
-            <div
-              className="emoji_picker"
-              style={{ display: emojiOpened ? "block" : "none" }}
-            >
-              <EmojiPicker searchDisabled={true} onEmojiClick={onEmojiClick} />
-            </div>
-
+            <ImageUploader
+              images={images}
+              setImages={setImages}
+              imageFiles={imageFiles}
+              setImageFiles={setImageFiles}
+            />
             <form
               className="chat_form"
               onSubmit={(e) => {
@@ -506,20 +541,34 @@ const Chat = ({ users, id, messages, setMessages, fetchChats }) => {
                 onSubmit({ id1: id, id2: isLoggedIn.id, message: text });
               }}
             >
-              <ImageUploader
-                images={images}
-                setImages={setImages}
-                imageFiles={imageFiles}
-                setImageFiles={setImageFiles}
-              />
+              <div className="chat_input--parent">
+                <div
+                  onClick={() => setEmojiOpened(!emojiOpened)}
+                  className="btn-icon"
+                >
+                  <img src={emoji_icon} />
+                </div>
+                <div
+                  className="emoji_picker"
+                  style={{ display: emojiOpened ? "block" : "none" }}
+                >
+                  <EmojiPicker
+                    searchDisabled={true}
+                    onEmojiClick={handleEmojiClick}
+                  />
+                </div>
 
-              <input
-                className="w-100"
-                type="text"
-                onChange={(e) => setText(e.target.value)}
-                placeholder="White text"
-              />
-              <button type="submit">Send</button>
+                <input
+                  className="w-100 chat_input"
+                  type="text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Write a message..."
+                />
+              </div>
+              <button className="btn-icon primary-btn" type="submit">
+                <img src={send_icon} />
+              </button>
             </form>
           </div>
         </>

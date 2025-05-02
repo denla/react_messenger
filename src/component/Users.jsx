@@ -5,7 +5,7 @@ import moment from "moment";
 import Tab from "./Tab";
 import Avatar from "./Avatar";
 
-const Users = ({ id, isLoggedIn }) => {
+const Users = ({ id, isLoggedIn, setOpenedMenu, isMobile }) => {
   const [users, setUsers] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [contacts, setContacts] = useState([]);
@@ -76,9 +76,18 @@ const Users = ({ id, isLoggedIn }) => {
         contacts
           .filter((user) => user.username.toLowerCase().includes(searchText))
           .map((user) => (
-            <Link to={`/messenger/${user.id}`}>
+            <Link
+              to={`/messenger/${user.id}`}
+              onClick={() => {
+                if (isMobile) {
+                  setOpenedMenu(false);
+                }
+              }}
+            >
               <div
-                className={`chat_item ${user.id == id && "active_chat"}`}
+                className={`chat_item ${
+                  user.id == id && !isMobile && "active_chat"
+                }`}
                 key={user.id}
               >
                 {/* <div
@@ -120,9 +129,18 @@ const Users = ({ id, isLoggedIn }) => {
         users
           .filter((user) => user.username.toLowerCase().includes(searchText))
           .map((user) => (
-            <Link to={`/messenger/${user.id}`}>
+            <Link
+              to={`/messenger/${user.id}`}
+              onClick={() => {
+                if (isMobile) {
+                  setOpenedMenu(false);
+                }
+              }}
+            >
               <div
-                className={`chat_item ${user.id == id && "active_chat"}`}
+                className={`chat_item ${
+                  user.id == id && !isMobile && "active_chat"
+                }`}
                 key={user.id}
               >
                 {/* <div
