@@ -98,7 +98,7 @@ const Users = ({ id, isLoggedIn, setOpenedMenu, isMobile }) => {
                 ></div> */}
 
                 <Avatar
-                  size={64}
+                  size={50}
                   name={user.username}
                   img_url={user.avatar_path}
                   online={user.online}
@@ -151,7 +151,7 @@ const Users = ({ id, isLoggedIn, setOpenedMenu, isMobile }) => {
                 ></div> */}
 
                 <Avatar
-                  size={64}
+                  size={50}
                   name={user.username}
                   img_url={user.avatar_path}
                   online={user.online}

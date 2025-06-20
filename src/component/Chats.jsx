@@ -7,6 +7,7 @@ import ContextButton from "./ContextButton";
 import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 
+import Tabs from "./Tabs";
 const Chats = ({ chats, setChats, openedMenu, setOpenedMenu, isMobile }) => {
   const { id } = useParams();
 
@@ -47,6 +48,7 @@ const Chats = ({ chats, setChats, openedMenu, setOpenedMenu, isMobile }) => {
         placeholder="Search"
         onChange={(e) => setSearchText(e.target.value)}
       />
+      <Tabs />
 
       {chats
         .filter((chat) =>
@@ -66,7 +68,7 @@ const Chats = ({ chats, setChats, openedMenu, setOpenedMenu, isMobile }) => {
               }}
             >
               <Avatar
-                size={64}
+                size={50}
                 name={chat.other_username}
                 img_url={chat.avatar_path}
                 online={chat.other_online}

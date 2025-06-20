@@ -33,7 +33,7 @@ function Login() {
   return (
     <div>
       <div className="login_form card">
-        <div className="menu_tabs">
+        <div className="menu_tabs gray_tabs">
           {tabs.map((tab, index) => (
             <div
               key={index}

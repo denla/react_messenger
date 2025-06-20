@@ -12,9 +12,10 @@ import Settings from "../component/Settings";
 import SettingsPage from "../component/SettingsPage";
 import Tab from "../component/Tab";
 
-import back_icon from "../sources/icons/back_icon.svg";
-import menu_icon from "../sources/icons/menu_icon.svg";
-import { set } from "react-hook-form";
+/*FRAMER */
+import { AnimatePresence, motion } from "framer-motion";
+import TabSwitcher from "../component/Framer";
+
 const Messenger = () => {
   const [openedMenu, setOpenedMenu] = useState(true);
   const socket = new WebSocket("ws://localhost:8080");
@@ -46,6 +47,10 @@ const Messenger = () => {
   const [chats, setChats] = useState([]);
 
   const [activeTab, setActiveTab] = useState(0);
+  const [settingsTab, setSettingsTab] = useState(0);
+
+  const settingsTabs = [{ title: "Account settings" }, { title: "Appearance" }];
+
   const tabs = [
     {
       title: "Chats",
@@ -78,6 +83,9 @@ const Messenger = () => {
           isLoggedIn={isLoggedIn}
           setIsLoggedIn={setIsLoggedIn}
           socket={socket}
+          setSettingsTab={setSettingsTab}
+          settingsTab={settingsTab}
+          settingsTabs={settingsTabs}
         />
       ),
     },
@@ -133,14 +141,6 @@ const Messenger = () => {
     fetchChats();
   }, []);
 
-  // useEffect(() => {
-  //   axios.get(`http://localhost:3001/chats/${isLoggedIn.id}`).then((res) => {
-  //     console.log("CHATS");
-  //     console.log(res.data);
-  //     setChats(res.data);
-  //   });
-  // }, []);
-
   // WebSocket
   socket.onopen = () => {
     console.log("Соединение установлено");
@@ -162,22 +162,27 @@ const Messenger = () => {
         {openedMenu && (
           <div className="chats_left">
             <div className="chats_list">
-              {/* <button className="btn-icon" onClick={setOpenedMenu(!openedMenu)}>
-              <img src={back_icon} />
-            </button> */}
-              {/* <button
-                className="btn-icon"
-                onClick={() => setOpenedMenu(!openedMenu)}
-              >
-                <img src={back_icon} />
-              </button> */}
-              <Tab
-                title={tabs[activeTab].title}
-                content={tabs[activeTab].content}
-              />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ x: activeTab === "Home" ? -50 : 50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: activeTab === "Home" ? 50 : -50, opacity: 0 }}
+                  transition={{ duration: 0.1 }}
+                  className="absolute inset-0 p-4"
+                >
+                  <Tab
+                    title={tabs[activeTab].title}
+                    content={tabs[activeTab].content}
+                  />
+                </motion.div>
+              </AnimatePresence>
             </div>
 
-            <div className="menu_tabs">
+            {/* <h1>HELLO</h1>
+            <TabSwitcher /> */}
+
+            <div className="menu_tabs navigate">
               {tabs.map((tab, index) => (
                 <div
                   key={index}
@@ -190,10 +195,23 @@ const Messenger = () => {
             </div>
           </div>
         )}
+
+        {/* <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab === 2 ? "settings" : id ? "chat" : "empty"}
+            initial={{ x: 50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -50, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className={`chats_right ${
+              openedMenu && isMobile && "display-none"
+            }`}
+          > */}
         <div
           className={`chats_right ${openedMenu && isMobile && "display-none"}`}
         >
-          {activeTab === 2 && <SettingsPage />}
+          {activeTab === 2 && <SettingsPage settingsTab={settingsTab} />}
+
           {activeTab != 2 &&
             (id ? (
               <Chat
@@ -209,50 +227,9 @@ const Messenger = () => {
             ) : (
               <EmptyChat />
             ))}
-
-          {/* <div className="chat_header">
-            {users.find((user) => user.id == id)?.username}
-            <div className="txt-secondary">
-              {users.find((user) => user.id == id)?.email}
-            </div>
-          </div>
-          <div className="chat_messages">
-            {!id && <p>Select any chat from the list</p>}
-            {messages &&
-              messages.map((message) => (
-                <div className="message">
-                  <div
-                    className={`message-bubble ${
-                      message.id1 == id && "own-bubble"
-                    }`}
-                    key={message.id}
-                  >
-                    {message.message}
-                  </div>
-                  <div className="txt-secondary">
-                    {moment(message.created_at).format("DD MMMM, HH:mm")}
-                  </div>
-                </div>
-              ))}
-          </div>
-          <div className="chat_input">
-            <form
-              className="chat_form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                onSubmit({ id1: id, id2: isLoggedIn.id, message: text });
-              }}
-            >
-              <input
-                className="w-100"
-                type="text"
-                onChange={(e) => setText(e.target.value)}
-                placeholder="White text"
-              />
-              <button type="submit">Send</button>
-            </form>
-          </div> */}
         </div>
+        {/* </motion.div>
+        </AnimatePresence> */}
       </div>
     </div>
   );

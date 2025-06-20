@@ -3,17 +3,18 @@ import { useNavigate } from "react-router-dom";
 import SettingsPage from "./SettingsPage";
 import axios from "axios";
 import moment from "moment";
-const Settings = ({ isLoggedIn, setIsLoggedIn, socket }) => {
+const Settings = ({
+  isLoggedIn,
+  setIsLoggedIn,
+  socket,
+  settingsTabs,
+  settingsTab,
+  setSettingsTab,
+}) => {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState(0);
+  // const [activeTab, setActiveTab] = useState(0);
   const [avatar, setAvatar] = useState("");
-
-  const tabs = [
-    { title: "Profile", content: <SettingsPage /> },
-    { title: "Security", content: <SettingsPage /> },
-    { title: "Appearance", content: <SettingsPage /> },
-  ];
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -32,7 +33,7 @@ const Settings = ({ isLoggedIn, setIsLoggedIn, socket }) => {
           style={{ backgroundImage: `url(http://localhost:3001/${avatar})` }}
         ></div>
         <h2>{isLoggedIn?.username}</h2>
-        <div className="txt-secondary">
+        {/* <div className="txt-secondary">
           last seen{" "}
           {moment(isLoggedIn?.updated_at)
             .format("DD MMMM, HH:mm")
@@ -41,7 +42,7 @@ const Settings = ({ isLoggedIn, setIsLoggedIn, socket }) => {
 
         {isLoggedIn?.email}
         <br />
-        {isLoggedIn?.id}
+        {isLoggedIn?.id} */}
         <button
           onClick={() => {
             setIsLoggedIn();
@@ -57,11 +58,11 @@ const Settings = ({ isLoggedIn, setIsLoggedIn, socket }) => {
 
       <br></br>
 
-      {tabs.map((tab, i) => (
+      {settingsTabs.map((tab, i) => (
         <div
-          className={`chat_item ${activeTab == i && "active_chat"}`}
+          className={`chat_item ${settingsTab == i && "active_chat"}`}
           key={i}
-          onClick={() => setActiveTab(i)}
+          onClick={() => setSettingsTab(i)}
         >
           {tab.title}
         </div>
