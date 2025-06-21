@@ -13,6 +13,8 @@ import Avatar from "./Avatar";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
+import ChatInput from "./chat/ChatInput";
+
 /*icons*/
 
 import back_icon from "../sources/icons/back_icon.svg";
@@ -34,7 +36,6 @@ const Chat = ({
   setOpenedMenu,
   isMobile,
 }) => {
-  const [text, setText] = useState("");
   const [postText, setPostText] = useState("");
 
   const [profileOpened, setProfileOpened] = useState(false);
@@ -43,17 +44,15 @@ const Chat = ({
   const [contacts, setContacts] = useState(false);
   const [avatars, setAvatars] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [images, setImages] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
 
   useEffect(() => {
     console.log("AVATARS");
     console.log(avatars);
   }, [avatars]);
 
-  const onEmojiClick = (event, emoji) => {
-    setText(text + emoji);
-  };
+  // const onEmojiClick = (event, emoji) => {
+  //   setText(text + emoji);
+  // };
 
   const addToContacts = async (contact_id) => {
     try {
@@ -85,31 +84,31 @@ const Chat = ({
       });
   }, [id]);
 
-  const onSubmit = async (data) => {
-    try {
-      if (text) {
-        const response = await axios.post(
-          "http://localhost:3001/message",
-          data
-        );
-        const response2 = await axios.post("http://localhost:3001/chats", {
-          uid_2: id,
-          uid_1: isLoggedIn.id,
-          last_message_id: response.data.id,
-        });
-        setMessages([...messages, data]);
-      }
-      handleUpload();
-      fetchChats();
-      // handleUploadImage();
-      // setImages([]);
-      // setImageFiles([]);
-      // setText("");
-    } catch (error) {
-      console.error(error);
-      //   setError(error.message);
-    }
-  };
+  // const onSubmit = async (data) => {
+  //   try {
+  //     if (text) {
+  //       const response = await axios.post(
+  //         "http://localhost:3001/message",
+  //         data
+  //       );
+  //       const response2 = await axios.post("http://localhost:3001/chats", {
+  //         uid_2: id,
+  //         uid_1: isLoggedIn.id,
+  //         last_message_id: response.data.id,
+  //       });
+  //       setMessages([...messages, data]);
+  //     }
+  //     handleUpload();
+  //     fetchChats();
+  //     // handleUploadImage();
+  //     // setImages([]);
+  //     // setImageFiles([]);
+  //     // setText("");
+  //   } catch (error) {
+  //     console.error(error);
+  //     //   setError(error.message);
+  //   }
+  // };
 
   const onSendPost = async (data) => {
     try {
@@ -128,18 +127,6 @@ const Chat = ({
       setPosts(res.data);
     });
   }, [id]);
-
-  /*Images remove */
-
-  const handleDeleteImage = (index) => {
-    const newImages = [...images];
-    newImages.splice(index, 1);
-    setImages(newImages);
-
-    const newImageFiles = [...imageFiles];
-    newImageFiles.splice(index, 1);
-    setImageFiles(newImageFiles);
-  };
 
   // const handleUpload = () => {
   //   console.log("handleUpload");
@@ -164,38 +151,6 @@ const Chat = ({
   //   }
   // };
 
-  const handleUpload = () => {
-    console.log("handleUpload");
-    if (isLoggedIn && imageFiles.length > 0) {
-      const formData = new FormData();
-
-      imageFiles.forEach((file) => {
-        formData.append("files", file); // ✅ отправляем настоящие File объекты
-      });
-
-      // formData.append("userId", isLoggedIn.id); // пользователь
-
-      formData.append("id1", isLoggedIn.id); // пользователь
-      formData.append("id2", id); // получатель
-
-      axios
-        .post("http://localhost:3001/upload-images", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-        .then((response) => {
-          console.log("RESPONSE AXIOS UPLOAD IMAGES", response.data);
-          alert("Изображения успешно загружены");
-          setImages([]);
-          setImageFiles([]);
-        })
-        .catch((error) => {
-          console.error("ERRORS AXIOS UPLOAD IMAGES", error);
-          alert("Ошибка загрузки изображений");
-        });
-    } else {
-      alert("Нет выбранных изображений или пользователь не авторизован.");
-    }
-  };
   // const handleUploadImage = () => {
   //   const formData = new FormData();
   //   images.forEach((image) => {
@@ -239,9 +194,9 @@ const Chat = ({
       setAvatars(res.data);
     });
   }, [id]);
-  const handleEmojiClick = (emojiData) => {
-    setText((prevText) => prevText + emojiData.emoji);
-  };
+  // const handleEmojiClick = (emojiData) => {
+  //   setText((prevText) => prevText + emojiData.emoji);
+  // };
 
   function isEmoji(str) {
     return (
@@ -250,6 +205,7 @@ const Chat = ({
       !/[a-zA-Z]+$/u.test(str)
     );
   }
+
   // function isEmoji(str) {
   //   return /\p{Emoji_Presentation}/u.test(str);
   // }
@@ -486,63 +442,64 @@ const Chat = ({
               <div className="chat_messages flex-end">
                 {!id && <p>Select any chat from the list</p>}
                 {messages.length ? (
-                  messages.map((message) => (
-                    <div className="message">
+                  messages.map((message, index) => (
+                    <>
+                      {moment(message.created_at).format("YYYY-MM-DD") !==
+                        moment(messages[index - 1]?.created_at).format(
+                          "YYYY-MM-DD"
+                        ) && (
+                        <div className="messages_separator">
+                          <div className="date">
+                            {moment(message.created_at).format("DD MMMM")}
+                          </div>
+                        </div>
+                      )}
                       <div
-                        className={`message-bubble ${
-                          isEmoji(message.message) && "emoji-bubble"
-                        } ${message.id1 == id && "own-bubble"}`}
-                        key={message.id}
+                        className={`message ${
+                          message.id1 == id && "message-own"
+                        }`}
                       >
-                        <div className="message_images">
-                          {/* <GridLayout autoLayout cols={3} rows={2}> */}
-                          <PhotoProvider>
-                            {message.images &&
-                              message.images.map((image, i) => (
-                                <PhotoView
-                                  key={i}
-                                  src={`http://localhost:3001/${image}`}
-                                >
-                                  <img
+                        <div
+                          className={`message-bubble ${
+                            isEmoji(message.message) && "emoji-bubble"
+                          } `}
+                          key={message.id}
+                        >
+                          <div className="message_images">
+                            {/* <GridLayout autoLayout cols={3} rows={2}> */}
+                            <PhotoProvider>
+                              {message.images &&
+                                message.images.map((image, i) => (
+                                  <PhotoView
+                                    key={i}
                                     src={`http://localhost:3001/${image}`}
-                                    alt=""
-                                  />
-                                </PhotoView>
-                              ))}
-                          </PhotoProvider>
-                          {/* </GridLayout> */}
+                                  >
+                                    <img
+                                      src={`http://localhost:3001/${image}`}
+                                      alt=""
+                                    />
+                                  </PhotoView>
+                                ))}
+                            </PhotoProvider>
+                          </div>
 
-                          {/* <img
-                            className="image_preview"
-                            src={`http://localhost:3001/${image}`}
-                            alt=""
-                          /> */}
+                          {message.message}
+                          <div className=" message-bubble--time">
+                            {moment(message.created_at).format("HH:mm")}
+                          </div>
                         </div>
-
-                        {message.message}
-                      </div>
-                      <div className="message_info">
-                        <ContextButton
-                          list={[
-                            {
-                              title: "Delete",
-                              onClick: () => removeMessage(message.id),
-                            },
-                          ]}
-                        />
-                        <div className="txt-secondary">
-                          {moment(message.created_at).format("DD MMMM, HH:mm")}
+                        <div className="message_info">
+                          <ContextButton
+                            list={[
+                              {
+                                title: "Delete",
+                                onClick: () => removeMessage(message.id),
+                              },
+                            ]}
+                          />
                         </div>
-                        {/* <div
-                      className="online"
-                      onClick={() => {
-                        removeMessage(message.id);
-                      }}
-                    >
-                      Remove
-                    </div> */}
                       </div>
-                    </div>
+                    </>
                   ))
                 ) : (
                   <div className="flex_center" style={{ height: "100%" }}>
@@ -550,77 +507,17 @@ const Chat = ({
                   </div>
                 )}
               </div>
-
-              {images.length > 0 ? (
-                <>
-                  <div className="images_preview">
-                    {images.map((image, idx) => {
-                      return (
-                        <div key={idx} style={{ position: "relative" }}>
-                          {" "}
-                          <img
-                            className="image_preview"
-                            src={image}
-                            alt=""
-                          />{" "}
-                          <button
-                            className="btn-icon btn-remove-img"
-                            onClick={() => handleDeleteImage(idx)}
-                          >
-                            <img src={close_icon} />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {/* <button onClick={handleUpload}>Upload</button> */}
-                </>
-              ) : null}
-
-              <div className="chat_input">
-                <ImageUploader
-                  images={images}
-                  setImages={setImages}
-                  imageFiles={imageFiles}
-                  setImageFiles={setImageFiles}
-                />
-                <form
-                  className="chat_form"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    onSubmit({ id1: id, id2: isLoggedIn.id, message: text });
-                  }}
-                >
-                  <div className="chat_input--parent">
-                    <div
-                      onClick={() => setEmojiOpened(!emojiOpened)}
-                      className="btn-icon"
-                    >
-                      <img src={emoji_icon} />
-                    </div>
-                    <div
-                      className="emoji_picker"
-                      style={{ display: emojiOpened ? "block" : "none" }}
-                    >
-                      <EmojiPicker
-                        searchDisabled={true}
-                        onEmojiClick={handleEmojiClick}
-                      />
-                    </div>
-
-                    <input
-                      className="w-100 chat_input"
-                      type="text"
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      placeholder="Write a message..."
-                    />
-                  </div>
-                  <button className="btn-icon primary-btn" type="submit">
-                    <img src={send_icon} />
-                  </button>
-                </form>
-              </div>
+              <ChatInput
+                id={id}
+                onSubmit={(data) => {
+                  console.log("onSubmit data", data);
+                  setMessages([...messages, data]);
+                }}
+                isLoggedIn={isLoggedIn}
+                fetchChats={fetchChats}
+                messages={messages}
+                setMessages={setMessages}
+              />
             </>
           )}
         </motion.div>

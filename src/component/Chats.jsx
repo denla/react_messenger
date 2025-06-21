@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 
 import Tabs from "./Tabs";
+import SearchInput from "./main_menu/SearchInput";
 const Chats = ({ chats, setChats, openedMenu, setOpenedMenu, isMobile }) => {
   const { id } = useParams();
 
@@ -42,14 +43,12 @@ const Chats = ({ chats, setChats, openedMenu, setOpenedMenu, isMobile }) => {
 
   return (
     <>
-      <input
-        className="search"
-        type="text"
-        placeholder="Search"
-        onChange={(e) => setSearchText(e.target.value)}
-      />
-      <Tabs />
+      <div className="chats_left--header">
+        <h2>Chats</h2>
+        <SearchInput searchText={searchText} setSearchText={setSearchText} />
+      </div>
 
+      {/* <Tabs /> */}
       {chats
         .filter((chat) =>
           chat.other_username.toLowerCase().includes(searchText)
@@ -68,7 +67,7 @@ const Chats = ({ chats, setChats, openedMenu, setOpenedMenu, isMobile }) => {
               }}
             >
               <Avatar
-                size={50}
+                size={54}
                 name={chat.other_username}
                 img_url={chat.avatar_path}
                 online={chat.other_online}

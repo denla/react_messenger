@@ -16,6 +16,11 @@ import Tab from "../component/Tab";
 import { AnimatePresence, motion } from "framer-motion";
 import TabSwitcher from "../component/Framer";
 
+/* Icons */
+import chats_icon from "../sources/icons/chats.svg";
+import contacts_icon from "../sources/icons/contacts.svg";
+import settings_icon from "../sources/icons/settings.svg";
+
 const Messenger = () => {
   const [openedMenu, setOpenedMenu] = useState(true);
   const socket = new WebSocket("ws://localhost:8080");
@@ -54,6 +59,7 @@ const Messenger = () => {
   const tabs = [
     {
       title: "Chats",
+      icon: chats_icon,
       content: (
         <Chats
           chats={chats}
@@ -66,6 +72,7 @@ const Messenger = () => {
     },
     {
       title: "People",
+      icon: contacts_icon,
       content: (
         <Users
           id={id}
@@ -78,6 +85,7 @@ const Messenger = () => {
     },
     {
       title: "Profile",
+      icon: settings_icon,
       content: (
         <Settings
           isLoggedIn={isLoggedIn}
@@ -165,48 +173,32 @@ const Messenger = () => {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeTab}
-                  initial={{ x: activeTab === "Home" ? -50 : 50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: activeTab === "Home" ? 50 : -50, opacity: 0 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.1 }}
-                  className="absolute inset-0 p-4"
                 >
-                  <Tab
-                    title={tabs[activeTab].title}
-                    content={tabs[activeTab].content}
-                  />
+                  {tabs[activeTab].content}
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* <h1>HELLO</h1>
-            <TabSwitcher /> */}
-
-            <div className="menu_tabs navigate">
+            <div className=" nav_tabs">
               {tabs.map((tab, index) => (
                 <div
-                  key={index}
-                  className={`menu_tab ${activeTab === index && "active_tab"}`}
+                  className={`nav_tabs--tab ${
+                    activeTab === index && "nav_tabs--tab-active"
+                  }`}
                   onClick={() => setActiveTab(index)}
                 >
-                  {tab.title}
+                  <img src={tab.icon} />
+                  <span>{tab.title}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab === 2 ? "settings" : id ? "chat" : "empty"}
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -50, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className={`chats_right ${
-              openedMenu && isMobile && "display-none"
-            }`}
-          > */}
         <div
           className={`chats_right ${openedMenu && isMobile && "display-none"}`}
         >

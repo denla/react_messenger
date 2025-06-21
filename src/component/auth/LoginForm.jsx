@@ -24,12 +24,23 @@ const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit(handleLogin)}>
-      <span className="align_center txt-secondary">
-        This information will be aviable for everyone.
-      </span>
-      <input type="email" {...register("email")} placeholder="Email" />
-      <input type="password" {...register("password")} placeholder="Password" />
-      <button type="submit " className="r-12">
+      <div className="login_form--top">
+        <h2>Login to your account</h2>
+        <span className="txt-secondary">And start to use or messenger</span>
+      </div>
+      <input
+        type="email"
+        {...register("email")}
+        placeholder="Email"
+        className="input--main"
+      />
+      <input
+        type="password"
+        {...register("password")}
+        placeholder="Password"
+        className="input--main"
+      />
+      <button type="submit " className="button-accent">
         Login
       </button>
       {error && <p style={{ color: "red" }}>{error}</p>}

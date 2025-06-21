@@ -5,6 +5,10 @@ import moment from "moment";
 import Tab from "./Tab";
 import Avatar from "./Avatar";
 
+import SearchInput from "./main_menu/SearchInput";
+import Tabs from "./Tabs";
+import User from "./main_menu/User";
+
 const Users = ({ id, isLoggedIn, setOpenedMenu, isMobile }) => {
   const [users, setUsers] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -34,145 +38,54 @@ const Users = ({ id, isLoggedIn, setOpenedMenu, isMobile }) => {
       });
   }, []);
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`http://localhost:3001/contacts/${isLoggedIn.id}`)
-  //     .then((response) => {
-  //       console.log(response.data);
-  //       setUsers(response.data);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // }, []);
   const tabs = [
-    { title: "Contacts", content: "" },
-    { title: "All", content: "" },
+    {
+      title: "Contacts",
+      content: (
+        <>
+          {contacts &&
+            contacts
+              .filter((user) =>
+                user.username.toLowerCase().includes(searchText)
+              )
+              .map((user) => (
+                <User
+                  id={id}
+                  user={user}
+                  isMobile={isMobile}
+                  setOpenedMenu={setOpenedMenu}
+                />
+              ))}
+        </>
+      ),
+    },
+    {
+      title: "All",
+      content: (
+        <>
+          {users
+            .filter((user) => user.username.toLowerCase().includes(searchText))
+            .map((user) => (
+              <User
+                id={id}
+                user={user}
+                isMobile={isMobile}
+                setOpenedMenu={setOpenedMenu}
+              />
+            ))}
+        </>
+      ),
+    },
   ];
 
   return (
     <>
-      <input
-        className="search"
-        type="text"
-        placeholder="Search"
-        onChange={(e) => setSearchText(e.target.value)}
-      />
-
-      {/* <div className="card_title">People</div> */}
-      <div className="menu_tabs" style={{ padding: "10px 0" }}>
-        {tabs.map((tab, index) => (
-          <div
-            key={index}
-            className={`menu_tab ${activeTab === index && "active_tab"}`}
-            onClick={() => setActiveTab(index)}
-          >
-            {tab.title}
-          </div>
-        ))}
+      <div className="chats_left--header">
+        <h2>Contacts</h2>
+        <SearchInput searchText={searchText} setSearchText={setSearchText} />
       </div>
-      {activeTab == 0 &&
-        contacts &&
-        contacts
-          .filter((user) => user.username.toLowerCase().includes(searchText))
-          .map((user) => (
-            <Link
-              to={`/messenger/${user.id}`}
-              onClick={() => {
-                if (isMobile) {
-                  setOpenedMenu(false);
-                }
-              }}
-            >
-              <div
-                className={`chat_item ${
-                  user.id == id && !isMobile && "active_chat"
-                }`}
-                key={user.id}
-              >
-                {/* <div
-                  className={`a-50 ${user.online && "a-online"}`}
-                  style={{
-                    backgroundImage: `url(http://localhost:3001/${user.avatar_path})`,
-                  }}
-                ></div> */}
 
-                <Avatar
-                  size={50}
-                  name={user.username}
-                  img_url={user.avatar_path}
-                  online={user.online}
-                ></Avatar>
-
-                <div className="message_right">
-                  {console.log("user.id", user.id, "id", id)}
-                  {user.username}{" "}
-                  {user.online ? (
-                    <div className="online">online</div>
-                  ) : (
-                    <div className="txt-secondary">
-                      last seen{" "}
-                      {moment(user.updated_at)
-                        .format("DD MMMM, HH:mm")
-                        .toLocaleLowerCase()}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))}
-
-      {/* <div className="card_title">Users</div> */}
-
-      {activeTab == 1 &&
-        users &&
-        users
-          .filter((user) => user.username.toLowerCase().includes(searchText))
-          .map((user) => (
-            <Link
-              to={`/messenger/${user.id}`}
-              onClick={() => {
-                if (isMobile) {
-                  setOpenedMenu(false);
-                }
-              }}
-            >
-              <div
-                className={`chat_item ${
-                  user.id == id && !isMobile && "active_chat"
-                }`}
-                key={user.id}
-              >
-                {/* <div
-                  className={`a-50 ${user.online && "a-online"}`}
-                  style={{
-                    backgroundImage: `url(http://localhost:3001/${user.avatar_path})`,
-                  }}
-                ></div> */}
-
-                <Avatar
-                  size={50}
-                  name={user.username}
-                  img_url={user.avatar_path}
-                  online={user.online}
-                ></Avatar>
-                <div className="message_right">
-                  {console.log("user.id", user.id, "id", id)}
-                  {user.username}{" "}
-                  {user.online ? (
-                    <div className="online">online</div>
-                  ) : (
-                    <div className="txt-secondary">
-                      last seen{" "}
-                      {moment(user.updated_at)
-                        .format("DD MMMM, HH:mm")
-                        .toLocaleLowerCase()}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))}
+      <Tabs tabs={tabs} />
     </>
   );
 };

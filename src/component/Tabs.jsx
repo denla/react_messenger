@@ -1,25 +1,13 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-const Tab = ({ title, content }) => (
-  <div style={{ padding: "1rem" }}>
-    <h2>{title}</h2>
-    <p>{content}</p>
-  </div>
-);
-
-const Tabs = () => {
+const Tabs = ({ tabs }) => {
   const [activeTab, setActiveTab] = useState(0);
-  const tabs = [
-    { title: "Таб 1", content: "Содержимое таба 1" },
-    { title: "Таб 2", content: "Содержимое таба 2" },
-    { title: "Таб 3", content: "Содержимое таба 3" },
-  ];
 
   return (
     <div>
       <div
-        className="menu_tabs navigate"
+        className="menu_tabs gray_tabs"
         style={{ display: "flex", gap: "0.5rem", position: "relative" }}
       >
         {tabs.map((tab, index) => (
@@ -32,7 +20,6 @@ const Tabs = () => {
               cursor: "pointer",
               padding: "0.5rem 1rem",
               userSelect: "none",
-              fontWeight: activeTab === index ? "600" : "400",
               zIndex: 1,
             }}
           >
@@ -47,7 +34,7 @@ const Tabs = () => {
                   right: 0,
                   bottom: 0,
                   borderRadius: "8px",
-                  backgroundColor: "rgb(232 232 232)",
+                  backgroundColor: "rgb(255 255 255)",
                   zIndex: -1,
                 }}
                 transition={{ type: "spring", stiffness: 500, damping: 40 }}
@@ -57,7 +44,19 @@ const Tabs = () => {
         ))}
       </div>
 
-      <Tab title={tabs[activeTab].title} content={tabs[activeTab].content} />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          layout
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.15 }}
+          style={{ overflow: "hidden" }}
+        >
+          {tabs[activeTab].content}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
