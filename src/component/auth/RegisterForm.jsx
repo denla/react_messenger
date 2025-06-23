@@ -22,9 +22,24 @@ const RegisterForm = () => {
         <span className="txt-secondary">And start to use or messenger</span>
       </div>
 
-      <input type="text" {...register("username")} placeholder="Username" />
-      <input type="email" {...register("email")} placeholder="Email" />
-      <input type="password" {...register("password")} placeholder="Password" />
+      <input
+        className="input--main"
+        type="text"
+        {...register("username")}
+        placeholder="Username"
+      />
+      <input
+        className="input--main"
+        type="email"
+        {...register("email")}
+        placeholder="Email"
+      />
+      <input
+        className="input--main"
+        type="password"
+        {...register("password")}
+        placeholder="Password"
+      />
       <button type="submit" className="button-accent">
         Create account
       </button>

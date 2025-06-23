@@ -16,13 +16,6 @@ const ChatInput = ({ id, isLoggedIn, fetchChats, messages, setMessages }) => {
     setText(text + emoji);
   };
 
-  /*************  ✨ Windsurf Command ⭐  *************/
-  /**
-   * Callback for when an emoji is clicked in the EmojiPicker component.
-   * @param {object} emojiData Object with a single property, "emoji", which is the string representation of the emoji.
-   * @returns {undefined}
-   */
-  /*******  d501d4a6-441e-44bc-8f83-4ef8042e70a0  *******/
   const handleEmojiClick = (emojiData) => {
     setText((prevText) => prevText + emojiData.emoji);
   };

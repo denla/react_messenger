@@ -20,6 +20,7 @@ import TabSwitcher from "../component/Framer";
 import chats_icon from "../sources/icons/chats.svg";
 import contacts_icon from "../sources/icons/contacts.svg";
 import settings_icon from "../sources/icons/settings.svg";
+import lock_icon from "../sources/icons/lock_icon.svg";
 
 const Messenger = () => {
   const [openedMenu, setOpenedMenu] = useState(true);
@@ -44,7 +45,8 @@ const Messenger = () => {
     }
   }, [isLoggedIn]);
 
-  const { id } = useParams();
+  let { id } = useParams();
+  id = parseInt(id, 10);
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
@@ -54,7 +56,12 @@ const Messenger = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [settingsTab, setSettingsTab] = useState(0);
 
-  const settingsTabs = [{ title: "Account settings" }, { title: "Appearance" }];
+  const settingsTabs = [
+    { title: "Account settings", icon: settings_icon },
+    { title: "Appearance", icon: contacts_icon },
+    { title: "Privacy", icon: lock_icon },
+    // { title: "About" },
+  ];
 
   const tabs = [
     {
@@ -153,6 +160,30 @@ const Messenger = () => {
   socket.onopen = () => {
     console.log("Соединение установлено");
     socket.send(JSON.stringify({ type: "login", userId: isLoggedIn?.id }));
+  };
+
+  //   socket.onmessage = (event) => {
+  //   const data = JSON.parse(event.data);
+  //   if (data.type === "new_message") {
+  //     // Здесь надо обновить чат, например:
+  //     setMessages(prev => [...prev, data.data]);
+  //   }
+  // };
+  // Если пришло сообщение
+
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === "new_message") {
+      const newMessage = data.data;
+
+      // Проверяем, что сообщение относится к текущему открытому чату
+      if (newMessage.id1 === id || newMessage.id2 === id) {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+
+      // Если нужно обновить список чатов, можно вызвать fetchChats()
+      fetchChats();
+    }
   };
 
   window.addEventListener("beforeunload", () => {

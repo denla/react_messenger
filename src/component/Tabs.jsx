@@ -33,7 +33,7 @@ const Tabs = ({ tabs }) => {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  borderRadius: "8px",
+                  borderRadius: "50px",
                   backgroundColor: "rgb(255 255 255)",
                   zIndex: -1,
                 }}

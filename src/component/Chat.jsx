@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { AuthContext } from "../AuthContext";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -25,6 +25,7 @@ import menu_icon from "../sources/icons/menu_icon.svg";
 
 /*framer-motion*/
 import { AnimatePresence, motion } from "framer-motion";
+import ProfilePage from "./chat/ProfilePage";
 
 const Chat = ({
   users,
@@ -35,24 +36,13 @@ const Chat = ({
   openedMenu,
   setOpenedMenu,
   isMobile,
+  typingUsers,
+  onUserTyping,
 }) => {
-  const [postText, setPostText] = useState("");
-
   const [profileOpened, setProfileOpened] = useState(false);
   const [emojiOpened, setEmojiOpened] = useState(false);
   const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
   const [contacts, setContacts] = useState(false);
-  const [avatars, setAvatars] = useState([]);
-  const [posts, setPosts] = useState([]);
-
-  useEffect(() => {
-    console.log("AVATARS");
-    console.log(avatars);
-  }, [avatars]);
-
-  // const onEmojiClick = (event, emoji) => {
-  //   setText(text + emoji);
-  // };
 
   const addToContacts = async (contact_id) => {
     try {
@@ -84,94 +74,6 @@ const Chat = ({
       });
   }, [id]);
 
-  // const onSubmit = async (data) => {
-  //   try {
-  //     if (text) {
-  //       const response = await axios.post(
-  //         "http://localhost:3001/message",
-  //         data
-  //       );
-  //       const response2 = await axios.post("http://localhost:3001/chats", {
-  //         uid_2: id,
-  //         uid_1: isLoggedIn.id,
-  //         last_message_id: response.data.id,
-  //       });
-  //       setMessages([...messages, data]);
-  //     }
-  //     handleUpload();
-  //     fetchChats();
-  //     // handleUploadImage();
-  //     // setImages([]);
-  //     // setImageFiles([]);
-  //     // setText("");
-  //   } catch (error) {
-  //     console.error(error);
-  //     //   setError(error.message);
-  //   }
-  // };
-
-  const onSendPost = async (data) => {
-    try {
-      const response = await axios.post("http://localhost:3001/posts", data);
-      setPosts([data, ...posts]);
-      // setPosts(response.data);
-    } catch (error) {
-      console.error(error);
-      //   setError(error.message);
-    }
-  };
-
-  useEffect(() => {
-    axios.get(`http://localhost:3001/posts/${id}`).then((res) => {
-      console.log(res.data);
-      setPosts(res.data);
-    });
-  }, [id]);
-
-  // const handleUpload = () => {
-  //   console.log("handleUpload");
-  //   if (isLoggedIn) {
-  //     const formData = new FormData();
-  //     images.forEach((files) => {
-  //       formData.append("files", files);
-  //     });
-  //     formData.append("userId", isLoggedIn.id);
-  //     console.log(formData);
-  //     axios
-  //       .post("http://localhost:3001/upload-images", formData, {
-  //         headers: { "Content-Type": "multipart/form-data" },
-  //       })
-  //       .then((response) => {
-  //         console.log("response.data");
-  //         console.log("RESPONSE AXIOS UPLOAD IMAGES");
-  //       })
-  //       .catch((error) => {
-  //         console.log("ERRORS AXIOS UPLOAD IMAGES");
-  //       });
-  //   }
-  // };
-
-  // const handleUploadImage = () => {
-  //   const formData = new FormData();
-  //   images.forEach((image) => {
-  //     formData.append("files", image);
-  //   });
-  //   formData.append("userId", isLoggedIn.id);
-  //   console.log("PREV AXIOS UPLOAD IMAGES");
-  //   axios
-  //     .post("http://localhost:3001/upload-images", formData)
-  //     .then((response) => {
-  //       console.log("RESPONSE AXIOS UPLOAD IMAGES");
-  //       console.log(response.data);
-  //     })
-  //     .catch((error) => {
-  //       console.log("ERRORS AXIOS UPLOAD IMAGES");
-  //       console.error(error);
-  //     });
-  // };
-
-  /*-=======*/
-
   const removeMessage = async (id) => {
     try {
       const response = await axios.delete(
@@ -185,19 +87,6 @@ const Chat = ({
     }
   };
 
-  useEffect(() => {
-    console.log("AVATARS");
-    console.log(id);
-    console.log("--------");
-    axios.get(`http://localhost:3001/avatars/${id}`).then((res) => {
-      console.log(res.data);
-      setAvatars(res.data);
-    });
-  }, [id]);
-  // const handleEmojiClick = (emojiData) => {
-  //   setText((prevText) => prevText + emojiData.emoji);
-  // };
-
   function isEmoji(str) {
     return (
       (str === "❤️" || /^\p{Emoji}+$/u.test(str)) &&
@@ -206,78 +95,15 @@ const Chat = ({
     );
   }
 
-  // function isEmoji(str) {
-  //   return /\p{Emoji_Presentation}/u.test(str);
-  // }
+  /* scoll to bottom */
+  const messagesEndRef = useRef(null);
 
-  // function isEmoji(str) {
-  //   return (
-  //     [...str].every((char) => /\p{Emoji_Presentation}/u.test(char)) &&
-  //     !/[a-zA-Z0-9]/u.test(str)
-  //   );
-  // }
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div className="chat">
-      <div
-        className={`chat_header` + " " + (profileOpened && "profile_header")}
-      >
-        {!profileOpened ? (
-          <>
-            <button
-              className="btn-icon"
-              onClick={() => setOpenedMenu(!openedMenu)}
-            >
-              <img src={menu_icon} />
-            </button>
-            <div
-              className="chat_header--info"
-              onClick={() => setProfileOpened(true)}
-            >
-              <Avatar
-                size={36}
-                name={users.find((user) => user.id == id)?.username}
-                img_url={users.find((user) => user.id == id)?.avatar_path}
-                online={users.find((user) => user.id == id)?.online}
-              ></Avatar>
-              <div className="chat_header--text">
-                {users.find((user) => user.id == id)?.username}
-
-                <div className="txt-secondary">
-                  {users.find((user) => user.id == id)?.online ? (
-                    <div className="online">online</div>
-                  ) : (
-                    <div className="txt-secondary">
-                      last seen{" "}
-                      {moment(users.find((user) => user.id == id)?.updated_at)
-                        .format("DD MMMM, HH:mm")
-                        .toLocaleLowerCase()}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="chat_header--info">
-            <button
-              className="btn-secondary"
-              onClick={() => setProfileOpened(false)}
-            >
-              Back
-            </button>
-          </div>
-        )}
-        <Link to="/messenger">
-          {/* <button className="btn-secondary">Close</button> */}
-          {!isMobile && (
-            <button className="btn-icon" type="submit">
-              <img src={close_icon} />
-            </button>
-          )}
-        </Link>
-      </div>
-
       <AnimatePresence mode="wait">
         <motion.div
           key={profileOpened} // ключ — обязательно! Меняется при смене чата
@@ -289,156 +115,68 @@ const Chat = ({
         >
           {profileOpened ? (
             <>
-              <div className="chat_messages flex_w-center">
-                <div className="cards_container">
-                  <div className="flex_w-center flex-column chat_profile card">
+              <ProfilePage
+                users={users}
+                id={id}
+                setProfileOpened={setProfileOpened}
+                addToContacts={addToContacts}
+                contacts={contacts}
+              ></ProfilePage>
+            </>
+          ) : (
+            <>
+              {!profileOpened && (
+                <div
+                  className={
+                    `chat_header` + " " + (profileOpened && "profile_header")
+                  }
+                >
+                  <button
+                    className="btn-icon btn-secondary"
+                    onClick={() => setOpenedMenu(!openedMenu)}
+                  >
+                    <img src={menu_icon} />
+                  </button>
+                  <div
+                    className="chat_header--info"
+                    onClick={() => setProfileOpened(true)}
+                  >
                     <Avatar
-                      size={120}
+                      size={36}
                       name={users.find((user) => user.id == id)?.username}
                       img_url={users.find((user) => user.id == id)?.avatar_path}
                       online={users.find((user) => user.id == id)?.online}
                     ></Avatar>
-
-                    <h2 className="profile_name">
+                    <div className="chat_header--text">
                       {users.find((user) => user.id == id)?.username}
-                    </h2>
-                    <div className="txt-secondary">
-                      {users.find((user) => user.id == id)?.online ? (
-                        <div className="online">online</div>
-                      ) : (
-                        <div className="txt-secondary">
-                          last seen{" "}
-                          {moment(
-                            users.find((user) => user.id == id)?.updated_at
-                          )
-                            .format("DD MMMM, HH:mm")
-                            .toLocaleLowerCase()}
-                        </div>
-                      )}
-                    </div>
 
-                    {/* {users.find((user) => user.id == id)?.email} */}
-                    <div className="profile_buttons">
-                      <button onClick={() => setProfileOpened(false)}>
-                        Send message
-                      </button>
-
-                      <button
-                        onClick={() => addToContacts(id)}
-                        className={contacts && "btn-secondary"}
-                      >
-                        {contacts ? "Remove contact" : "Add contact"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {avatars.length ? (
-                    <>
-                      <div className="card_title">Avatars</div>
-                      <div className="card">
-                        <div className="profile_photos">
-                          <PhotoProvider>
-                            {avatars.map((photo, i) => (
-                              <PhotoView
-                                key={i}
-                                src={`http://localhost:3001/${photo.avatar_path}`}
-                              >
-                                {/* <img
-                              src={`http://localhost:3001/${photo.avatar_path}`}
-                              alt=""
-                            /> */}
-                                <div
-                                  key2={photo.id}
-                                  user_id={photo.user_id}
-                                  className="profile_photos--item"
-                                  style={{
-                                    backgroundImage: `url(http://localhost:3001/${photo.avatar_path})`,
-                                  }}
-                                ></div>
-                              </PhotoView>
-                            ))}
-                          </PhotoProvider>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    ""
-                  )}
-
-                  <div className="card_title">Posts</div>
-                  {isLoggedIn.id == id && (
-                    <>
-                      <div className="card" style={{ padding: "8px" }}>
-                        <form
-                          className="chat_form"
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            onSendPost({
-                              user_id: isLoggedIn.id,
-                              text: postText,
-                            });
-                          }}
-                        >
-                          <input
-                            className="w-100"
-                            type="text"
-                            onChange={(e) => setPostText(e.target.value)}
-                            placeholder="Write text"
-                          />
-                          <button type="submit">Send</button>
-                        </form>
-                      </div>
-                    </>
-                  )}
-
-                  {/* <div className="card">No posts here</div> */}
-                  <div className="card posts">
-                    {posts.length == 0 && (
-                      <span className="txt-secondary no_posts">
-                        {" "}
-                        No posts here
-                      </span>
-                    )}
-                    {posts.map((post) => (
-                      <>
-                        <div className="post" key={post.id}>
-                          <div
-                            className="chat_header--info"
-                            onClick={() => setProfileOpened(true)}
-                          >
-                            <Avatar
-                              size={36}
-                              name={
-                                users.find((user) => user.id == id)?.username
-                              }
-                              img_url={
-                                users.find((user) => user.id == id)?.avatar_path
-                              }
-                              online={
-                                users.find((user) => user.id == id)?.online
-                              }
-                            ></Avatar>
-                            <div className="chat_header--text">
-                              {users.find((user) => user.id == id)?.username}
-                              <div className="txt-secondary">
-                                {moment(post.created_at).format(
-                                  "DD MMMM, HH:mm"
-                                )}
-                              </div>
-                            </div>
+                      <div className="txt-secondary">
+                        {users.find((user) => user.id == id)?.online ? (
+                          <div className="online">online</div>
+                        ) : (
+                          <div className="txt-secondary">
+                            last seen{" "}
+                            {moment(
+                              users.find((user) => user.id == id)?.updated_at
+                            )
+                              .format("DD MMMM, HH:mm")
+                              .toLocaleLowerCase()}
                           </div>
-
-                          {post.text}
-                        </div>
-                        <div className="separator"></div>
-                      </>
-                    ))}
+                        )}
+                      </div>
+                    </div>
                   </div>
+                  <Link to="/messenger">
+                    {/* <button className="btn-secondary">Close</button> */}
+                    {!isMobile && (
+                      <button className="btn-icon btn-secondary">
+                        <img src={close_icon} />
+                      </button>
+                    )}
+                  </Link>
                 </div>
-              </div>
-            </>
-          ) : (
-            <>
+              )}
+
               <div className="chat_messages flex-end">
                 {!id && <p>Select any chat from the list</p>}
                 {messages.length ? (
@@ -506,7 +244,9 @@ const Chat = ({
                     <span className="txt-secondary">No messages here</span>
                   </div>
                 )}
+                <div ref={messagesEndRef}></div>
               </div>
+
               <ChatInput
                 id={id}
                 onSubmit={(data) => {

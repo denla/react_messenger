@@ -9,6 +9,8 @@ import SearchInput from "./main_menu/SearchInput";
 import Tabs from "./Tabs";
 import User from "./main_menu/User";
 
+import EmptyState from "./EmptyState";
+
 const Users = ({ id, isLoggedIn, setOpenedMenu, isMobile }) => {
   const [users, setUsers] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -38,24 +40,32 @@ const Users = ({ id, isLoggedIn, setOpenedMenu, isMobile }) => {
       });
   }, []);
 
+  const filteredContacts = contacts.filter((user) =>
+    user.username.toLowerCase().includes(searchText)
+  );
+
+  const filteredUsers = users.filter((user) =>
+    user.username.toLowerCase().includes(searchText)
+  );
+
   const tabs = [
     {
       title: "Contacts",
       content: (
         <>
-          {contacts &&
-            contacts
-              .filter((user) =>
-                user.username.toLowerCase().includes(searchText)
-              )
-              .map((user) => (
-                <User
-                  id={id}
-                  user={user}
-                  isMobile={isMobile}
-                  setOpenedMenu={setOpenedMenu}
-                />
-              ))}
+          {filteredContacts.length > 0 ? (
+            filteredContacts.map((user) => (
+              <User
+                key={user.id}
+                id={id}
+                user={user}
+                isMobile={isMobile}
+                setOpenedMenu={setOpenedMenu}
+              />
+            ))
+          ) : (
+            <EmptyState title="No contacts found" emoji={"🔍"} />
+          )}
         </>
       ),
     },
@@ -63,16 +73,19 @@ const Users = ({ id, isLoggedIn, setOpenedMenu, isMobile }) => {
       title: "All",
       content: (
         <>
-          {users
-            .filter((user) => user.username.toLowerCase().includes(searchText))
-            .map((user) => (
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((user) => (
               <User
+                key={user.id}
                 id={id}
                 user={user}
                 isMobile={isMobile}
                 setOpenedMenu={setOpenedMenu}
               />
-            ))}
+            ))
+          ) : (
+            <EmptyState title="No users found" emoji={"🔍"} />
+          )}
         </>
       ),
     },
