@@ -43,31 +43,81 @@ app.post("/register", async (req, res) => {
 const WebSocket = require("ws");
 const wss = new WebSocket.Server({ port: 8080 });
 
+const clients = new Map(); // Список подключенных клиентов
+
 wss.on("connection", (ws) => {
   console.log("Пользователь подключился");
+  console.log(clients.size, "clients connected");
+  // console.log(Array.from(clients));
 
   ws.on("message", (data) => {
     const message = JSON.parse(data);
-    if (message.type == "login") {
+
+    if (message.type == "login" && message.userId !== undefined) {
       ws.userId = message.userId;
-      console.log("DATA");
-      console.log(ws.userId);
-      console.log(message.userId);
+      clients.set(ws.userId, ws); // Добавляем в карту подключений
+      console.log(`User logged in: ${ws.userId}`);
+      console.log("Текущие клиенты:", Array.from(clients.keys()));
       db.query("UPDATE users SET online = true WHERE id = $1", [ws.userId]);
     } else if (message.type == "logout") {
       db.query("UPDATE users SET online = false WHERE id = $1", [ws.userId]);
+    }
+
+    if (message.type === "typing") {
+      // Пришел typing от пользователя - пересылаем всем остальным
+      const { userId, isTyping } = message;
+
+      clients.forEach((clientWs, clientId) => {
+        if (clientId !== userId && clientWs.readyState === WebSocket.OPEN) {
+          clientWs.send(
+            JSON.stringify({
+              type: "typing",
+              userId,
+              isTyping,
+            })
+          );
+        }
+      });
     }
   });
 
   ws.on("close", () => {
     console.log("Пользователь отключился");
-    const userId = ws.userId;
-    db.query(
-      "UPDATE users SET online = false, updated_at = NOW() WHERE id = $1",
-      [userId]
-    );
+    if (ws.userId) {
+      clients.delete(ws.userId); // Удаляем из карты
+      db.query(
+        "UPDATE users SET online = false, updated_at = NOW() WHERE id = $1",
+        [ws.userId]
+      );
+    }
   });
 });
+
+// wss.on("connection", (ws) => {
+//   console.log("Пользователь подключился");
+
+//   ws.on("message", (data) => {
+//     const message = JSON.parse(data);
+//     if (message.type == "login") {
+//       ws.userId = message.userId;
+//       console.log("DATA");
+//       console.log(ws.userId);
+//       console.log(message.userId);
+//       db.query("UPDATE users SET online = true WHERE id = $1", [ws.userId]);
+//     } else if (message.type == "logout") {
+//       db.query("UPDATE users SET online = false WHERE id = $1", [ws.userId]);
+//     }
+//   });
+
+//   ws.on("close", () => {
+//     console.log("Пользователь отключился");
+//     const userId = ws.userId;
+//     db.query(
+//       "UPDATE users SET online = false, updated_at = NOW() WHERE id = $1",
+//       [userId]
+//     );
+//   });
+// });
 
 // =======
 
@@ -89,7 +139,7 @@ app.post("/login", async (req, res) => {
 
 app.patch("/users/:id", async (req, res) => {
   const { id } = req.params;
-  const { email, username, password } = req.body;
+  const { email, username, bio } = req.body;
   const user = await db.query("SELECT * FROM users WHERE id = $1", [id]);
   if (!user.rows[0]) {
     return res.status(404).json({ message: "User not found" });
@@ -101,13 +151,16 @@ app.patch("/users/:id", async (req, res) => {
   if (username) {
     updatedUser.username = username;
   }
-  if (password) {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    updatedUser.password = hashedPassword;
+  if (bio) {
+    updatedUser.bio = bio;
   }
+  // if (password) {
+  //   const hashedPassword = await bcrypt.hash(password, 10);
+  //   updatedUser.password = hashedPassword;
+  // }
   await db.query(
-    "UPDATE users SET email = $1, username = $2, password = $3 WHERE id = $4",
-    [updatedUser.email, updatedUser.username, updatedUser.password, id]
+    "UPDATE users SET email = $1, username = $2, bio = $3 WHERE id = $4",
+    [updatedUser.email, updatedUser.username, updatedUser.bio, id]
   );
   res.json(updatedUser);
 });
@@ -118,7 +171,25 @@ app.post("/message", async (req, res) => {
     "INSERT INTO messages (id1, id2, message) VALUES ($1, $2, $3) RETURNING *",
     [id1, id2, message]
   );
-  res.json(response.rows[0]);
+
+  const newMessage = response.rows[0];
+
+  console.log("Socket for id1:", clients.get(id1)); // Логируем сокет отправителя
+  console.log("Socket for id2:", clients.get(id2)); // Логируем сокет получателя
+
+  console.log("id1:", id1, typeof id1);
+  console.log("id2:", id2, typeof id2);
+  console.log("Ключи в clients:", Array.from(clients.keys()));
+
+  // Отправляем сообщение получателю по WebSocket
+  const receiverSocket = clients.get(id1);
+  if (receiverSocket && receiverSocket.readyState === WebSocket.OPEN) {
+    receiverSocket.send(
+      JSON.stringify({ type: "new_message", data: newMessage })
+    );
+    console.log("Сообщение отправлено получателю:", newMessage, id1);
+  }
+  res.json(newMessage);
 });
 
 app.get("/message", async (req, res) => {
@@ -195,7 +266,7 @@ app.get("/users", async (req, res) => {
   // );
 
   const response = await db.query(
-    "SELECT users.updated_at, users.online, users.id, users.username, users.email, MAX(avatars.avatar_path) AS avatar_path FROM users LEFT JOIN avatars ON users.id = avatars.user_id GROUP BY users.id, users.username, users.email;"
+    "SELECT users.updated_at, users.online, users.id, users.username, users.email, users.bio, MAX(avatars.avatar_path) AS avatar_path FROM users LEFT JOIN avatars ON users.id = avatars.user_id GROUP BY users.id, users.username, users.email;"
   );
   res.json(response.rows);
 });

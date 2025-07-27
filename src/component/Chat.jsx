@@ -246,7 +246,34 @@ const Chat = ({
                 )}
                 <div ref={messagesEndRef}></div>
               </div>
+              {/* {Array.from(typingUsers).map((userId) => (
+                <p key={userId} style={{ margin: 0 }}>
+                  Пользователь {userId} печатает...
+                </p>
+              ))} */}
 
+              <AnimatePresence>
+                {Array.from(typingUsers).length > 0 && (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.1 }}
+                    style={{
+                      opacity: "0.4",
+                      padding: "0 12px ",
+                    }}
+                  >
+                    {Array.from(typingUsers).map((userId) => (
+                      <p key={userId} style={{ margin: 0 }}>
+                        печатает...
+                        {/* Пользователь {userId} печатает... */}
+                      </p>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <ChatInput
                 id={id}
                 onSubmit={(data) => {
@@ -257,6 +284,12 @@ const Chat = ({
                 fetchChats={fetchChats}
                 messages={messages}
                 setMessages={setMessages}
+              />
+
+              <input
+                type="text"
+                onChange={onUserTyping}
+                placeholder="Напиши сообщение..."
               />
             </>
           )}

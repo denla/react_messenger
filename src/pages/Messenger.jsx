@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import moment from "moment";
 
@@ -162,33 +162,133 @@ const Messenger = () => {
     socket.send(JSON.stringify({ type: "login", userId: isLoggedIn?.id }));
   };
 
+  const [typingUsers, setTypingUsers] = useState(new Set());
+  const typingTimeouts = useRef({});
+
+  // useEffect(() => {
   //   socket.onmessage = (event) => {
-  //   const data = JSON.parse(event.data);
-  //   if (data.type === "new_message") {
-  //     // Здесь надо обновить чат, например:
-  //     setMessages(prev => [...prev, data.data]);
-  //   }
+  //     const data = JSON.parse(event.data);
+
+  //     if (data.type === "typing") {
+  //       setTypingUsers((prev) => {
+  //         const newSet = new Set(prev);
+
+  //         if (data.isTyping) {
+  //           newSet.add(data.userId);
+  //           // Таймаут на удаление пользователя из списка через 4 секунды
+  //           clearTimeout(typingTimeouts.current[data.userId]);
+  //           typingTimeouts.current[data.userId] = setTimeout(() => {
+  //             setTypingUsers((prevInner) => {
+  //               const innerSet = new Set(prevInner);
+  //               innerSet.delete(data.userId);
+  //               return innerSet;
+  //             });
+  //           }, 4000);
+  //         } else {
+  //           newSet.delete(data.userId);
+  //         }
+
+  //         return newSet;
+  //       });
+  //     }
+  //   };
+  // }, [socket]);
+  // // Функция вызывается при вводе пользователя
+  // const onUserTyping = () => {
+  //   socket.send(
+  //     JSON.stringify({
+  //       type: "typing",
+  //       userId: isLoggedIn.id,
+  //       isTyping: true,
+  //     })
+  //   );
+
+  //   // Через 3 секунды сообщаем, что перестали печатать
+  //   clearTimeout(typingTimeouts.current[isLoggedIn.id]);
+  //   typingTimeouts.current[isLoggedIn.id] = setTimeout(() => {
+  //     socket.send(
+  //       JSON.stringify({
+  //         type: "typing",
+  //         userId: isLoggedIn.id,
+  //         isTyping: false,
+  //       })
+  //     );
+  //   }, 3000);
   // };
-  // Если пришло сообщение
 
-  socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === "new_message") {
-      const newMessage = data.data;
+  useEffect(() => {
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
 
-      // Проверяем, что сообщение относится к текущему открытому чату
-      if (newMessage.id1 === id || newMessage.id2 === id) {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      // ====== TYPING ======
+      if (data.type === "typing") {
+        setTypingUsers((prev) => {
+          const newSet = new Set(prev);
+
+          if (data.isTyping) {
+            newSet.add(data.userId);
+            clearTimeout(typingTimeouts.current[data.userId]);
+            typingTimeouts.current[data.userId] = setTimeout(() => {
+              setTypingUsers((prevInner) => {
+                const innerSet = new Set(prevInner);
+                innerSet.delete(data.userId);
+                return innerSet;
+              });
+            }, 4000);
+          } else {
+            newSet.delete(data.userId);
+          }
+
+          return newSet;
+        });
       }
 
-      // Если нужно обновить список чатов, можно вызвать fetchChats()
-      fetchChats();
-    }
-  };
+      // ====== NEW MESSAGE ======
+      if (data.type === "new_message") {
+        const newMessage = data.data;
+
+        if (newMessage.id1 === id || newMessage.id2 === id) {
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+        }
+
+        fetchChats();
+      }
+    };
+
+    // Выход из аккаунта при закрытии вкладки
+    window.addEventListener("beforeunload", () => {
+      socket.send(JSON.stringify({ type: "logout", userId: isLoggedIn?.id }));
+    });
+
+    return () => {
+      socket.onmessage = null;
+    };
+  }, [socket, id, isLoggedIn?.id]);
 
   window.addEventListener("beforeunload", () => {
     socket.send(JSON.stringify({ type: "logout", userId: isLoggedIn?.id }));
   });
+
+  const onUserTyping = () => {
+    socket.send(
+      JSON.stringify({
+        type: "typing",
+        userId: isLoggedIn.id,
+        isTyping: true,
+      })
+    );
+
+    clearTimeout(typingTimeouts.current[isLoggedIn.id]);
+    typingTimeouts.current[isLoggedIn.id] = setTimeout(() => {
+      socket.send(
+        JSON.stringify({
+          type: "typing",
+          userId: isLoggedIn.id,
+          isTyping: false,
+        })
+      );
+    }, 3000);
+  };
 
   // // Когда пользователь логинится, отправляем сообщение о подключении на сервер
   // socket.send("login");
@@ -246,6 +346,8 @@ const Messenger = () => {
                 openedMenu={openedMenu}
                 setOpenedMenu={setOpenedMenu}
                 isMobile={isMobile}
+                typingUsers={typingUsers}
+                onUserTyping={onUserTyping}
               />
             ) : (
               <EmptyChat />
