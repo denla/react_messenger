@@ -4,7 +4,7 @@
 
 React Messenger — fullstack-приложение с авторизацией, возможностью отправки сообщений, фото. Есть раздел настроек, профили пользователей и возможность создания постов.
 
-![Preview](frontend/public/preview.png)
+![Preview](src/messenger_preview.png)
 
 **Стек технологий:**
 
